@@ -37,7 +37,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
       }`
     );
 
-    const data = await response.json();
+    const data: Chat[] = await response.json();
 
     setBefore(data[0].id);
     setChats((prev) => {
@@ -62,8 +62,10 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
   };
 
   useEffect(() => {
-    loadChats();
-    setIsFirstLoaded(true);
+    (async () => {
+      await loadChats();
+      setIsFirstLoaded(true);
+    })();
   }, []);
 
   useEffect(() => {
