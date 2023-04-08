@@ -1,11 +1,18 @@
-import { FC, useEffect } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
-import { useRecoilState } from "recoil";
 import { getColor } from "../colors";
-import { chatsState } from "../states/chats";
 import Message from "./discord/Message";
 import Spinner from "./discord/Spinner";
+
+interface Chat {
+  id: number;
+  content: string;
+  time: string;
+  emotes?: {
+    [key: string]: string[];
+  };
+}
 
 interface ChatsProps {
   id: string;
@@ -14,25 +21,79 @@ interface ChatsProps {
 }
 
 const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
-  const [chats, setChats] = useRecoilState(chatsState);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const spinnerRef = useRef<HTMLDivElement>(null);
+
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [before, setBefore] = useState<number | null>(null);
+  const [isFirstLoaded, setIsFirstLoaded] = useState(false);
+  const [oldHeight, setOldHeight] = useState(0);
+  const [oldScroll, setOldScroll] = useState(0);
+
+  const loadChats = async () => {
+    const response = await fetch(
+      `https://api.wakscord.xyz/extension/${twitchId}/chats?before=${
+        before ? before : ""
+      }`
+    );
+
+    const data = await response.json();
+
+    setBefore(data[0].id);
+    setChats((prev) => {
+      return [
+        ...data.filter(
+          (chat: Chat) => !prev.find((prevChat) => prevChat.id === chat.id)
+        ),
+        ...prev,
+      ];
+    });
+
+    if (containerRef.current) {
+      setOldHeight(containerRef.current.scrollHeight);
+      setOldScroll(containerRef.current.scrollTop);
+    }
+  };
+
+  const onIntersect = async ([entry]: IntersectionObserverEntry[]) => {
+    if (entry.isIntersecting) {
+      loadChats();
+    }
+  };
 
   useEffect(() => {
-    (async () => {
-      const response = await fetch(
-        `https://api.wakscord.xyz/extension/${twitchId}/chats`
-      );
-
-      const data = await response.json();
-
-      setChats(data);
-    })();
+    loadChats();
+    setIsFirstLoaded(true);
   }, []);
 
+  useEffect(() => {
+    let observer: IntersectionObserver;
+
+    if (spinnerRef.current) {
+      observer = new IntersectionObserver(onIntersect, {
+        threshold: 0.5,
+      });
+
+      observer.observe(spinnerRef.current);
+    }
+
+    return () => observer && observer.disconnect();
+  }, [spinnerRef, onIntersect]);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop =
+        containerRef.current.scrollHeight - oldHeight + oldScroll;
+    }
+  }, [oldHeight, oldScroll]);
+
   return (
-    <Container color={getColor(name).bottom}>
-      <SpinnerContainer>
-        <Spinner />
-      </SpinnerContainer>
+    <Container ref={containerRef} color={getColor(name).bottom}>
+      {isFirstLoaded && (
+        <SpinnerContainer ref={spinnerRef}>
+          <Spinner />
+        </SpinnerContainer>
+      )}
 
       <InnerContainer>
         {chats.map((chat, index) => (
