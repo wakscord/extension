@@ -5,6 +5,7 @@ import { useRecoilState } from "recoil";
 import { getColor } from "../colors";
 import { chatsState } from "../states/chats";
 import Message from "./discord/Message";
+import Spinner from "./discord/Spinner";
 
 interface ChatsProps {
   id: string;
@@ -29,6 +30,10 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
 
   return (
     <Container color={getColor(name).bottom}>
+      <SpinnerContainer>
+        <Spinner />
+      </SpinnerContainer>
+
       <InnerContainer>
         {chats.map((chat, index) => (
           <Message
@@ -79,10 +84,16 @@ const InnerContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 2px;
+
+  padding-bottom: 10px;
 `;
 
-const Text = styled.span`
-  margin: 0;
+const SpinnerContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  height: 100px;
 `;
 
 export default Chats;

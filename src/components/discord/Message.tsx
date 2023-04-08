@@ -105,6 +105,8 @@ const Avatar = styled.img`
   cursor: pointer;
   user-select: none;
   pointer-events: none;
+
+  top: 2px;
 `;
 
 const Header = styled.div`
