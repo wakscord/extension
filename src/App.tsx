@@ -3,6 +3,7 @@ import styled, { css } from "styled-components";
 
 import { useRecoilState } from "recoil";
 import Chats from "./components/Chats";
+import Default from "./components/Default";
 import Info from "./components/Info";
 import { channelState } from "./states/channel";
 
@@ -10,46 +11,26 @@ const App: FC = () => {
   const [channel, setChannel] = useRecoilState(channelState);
 
   useEffect(() => {
-    (async () => {
-      const id = [
-        "702754423",
-        "237570548",
-        "169700336",
-        "203667951",
-        "707328484",
-        "195641865",
-        "49045679",
-        "132782743",
-        "137881582",
-      ][5];
+    Twitch.ext.onAuthorized((auth) => {
+      const { channelId } = auth;
 
-      const response = await fetch(`https://api.wakscord.xyz/extension/${id}`);
+      (async () => {
+        const response = await fetch(
+          `https://api.wakscord.xyz/extension/${channelId}`
+        );
 
-      const data = await response.json();
+        const data = await response.json();
 
-      setChannel({
-        twitchId: id,
-        ...data,
-      });
-    })();
-
-    // Twitch.ext.onAuthorized((auth) => {
-    //   const { channelId } = auth;
-
-    //   (async () => {
-    //     const response = await fetch(
-    //       `https://api.wakscord.xyz/extension/${channelId}`
-    //     );
-
-    //     const data = await response.json();
-
-    //     setChannel(data);
-    //   })();
-    // });
+        setChannel({
+          twitchId: channelId,
+          ...data,
+        });
+      })();
+    });
   }, []);
 
-  if (!channel) {
-    return null;
+  if (!channel || !channel.id) {
+    return <Default />;
   }
 
   return (
