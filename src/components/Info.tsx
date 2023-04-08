@@ -16,9 +16,12 @@ const Info: FC<InfoProps> = ({ channel }) => {
       <Texts color={colors.text}>
         <Name>{channel.name}</Name>
         {channel.info && (
-          <Text>
+          <Link
+            href={`https://cafe.naver.com/steamindiegame/${channel.info.idx}`}
+            target="_blank"
+          >
             {channel.info.date} 뱅온정보: {channel.info.status}
-          </Text>
+          </Link>
         )}
       </Texts>
 
@@ -36,14 +39,12 @@ const Container = styled.div<{ color: string }>`
   display: flex;
   align-items: center;
 
-  /* top left right border radius */
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
 
   ${({ color }) =>
     color &&
     css`
-      /* background: linear-gradient(90deg, ${color}, #ededed); */
       background-color: ${color};
     `}
 `;
@@ -65,6 +66,11 @@ const Name = styled.span`
 `;
 
 const Text = styled.span``;
+
+const Link = styled.a`
+  text-decoration: underline;
+  color: white;
+`;
 
 const LogoContainer = styled.div`
   margin-left: auto;
