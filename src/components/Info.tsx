@@ -25,7 +25,11 @@ const Info: FC<InfoProps> = ({ channel }) => {
         )}
       </Texts>
 
-      <LogoContainer>
+      <LogoContainer
+        onClick={() => {
+          window.open("https://wakscord.xyz", "_blank");
+        }}
+      >
         <WakscordLogo width={80} fill={colors.text} />
       </LogoContainer>
     </Container>
@@ -78,6 +82,8 @@ const LogoContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+
+  cursor: pointer;
 `;
 
 export default Info;
