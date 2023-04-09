@@ -25,15 +25,16 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
   const spinnerRef = useRef<HTMLDivElement>(null);
 
   const [chats, setChats] = useState<Chat[]>([]);
+  const [last, setLast] = useState<Chat | null>(null);
   const [before, setBefore] = useState<number | null>(null);
   const [isFirstLoaded, setIsFirstLoaded] = useState(false);
   const [oldHeight, setOldHeight] = useState(0);
   const [oldScroll, setOldScroll] = useState(0);
 
-  const loadChats = async () => {
+  const loadChats = async (recent: boolean = false) => {
     const response = await fetch(
       `https://api.wakscord.xyz/extension/${twitchId}/chats?before=${
-        before ? before : ""
+        !recent || before ? before : ""
       }`
     );
 
@@ -46,7 +47,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
           (chat: Chat) => !prev.find((prevChat) => prevChat.id === chat.id)
         ),
         ...prev,
-      ];
+      ].sort((a: Chat, b: Chat) => (a.id > b.id ? 1 : a.id < b.id ? -1 : 0));
     });
 
     if (containerRef.current) {
@@ -61,11 +62,20 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
     }
   };
 
+  const interval = () => {
+    console.log("waaa");
+    loadChats(true);
+  };
+
   useEffect(() => {
     (async () => {
       await loadChats();
       setIsFirstLoaded(true);
     })();
+
+    const intervalId = setInterval(interval, 10000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
@@ -88,6 +98,14 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
         containerRef.current.scrollHeight - oldHeight + oldScroll;
     }
   }, [oldHeight, oldScroll]);
+
+  useEffect(() => {
+    setLast(chats[chats.length - 1]);
+
+    if (last && last.id !== chats[chats.length - 1].id) {
+      setOldScroll(containerRef.current?.scrollHeight || 0);
+    }
+  }, [chats, last]);
 
   return (
     <Container ref={containerRef} color={getColor(name).bottom}>
