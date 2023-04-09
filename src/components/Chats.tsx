@@ -63,7 +63,6 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
   };
 
   const interval = () => {
-    console.log("waaa");
     loadChats(true);
   };
 
