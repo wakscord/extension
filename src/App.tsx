@@ -1,5 +1,5 @@
 import { FC, useEffect } from "react";
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 
 import { useRecoilState } from "recoil";
 import Chats from "./components/Chats";
@@ -49,26 +49,15 @@ const App: FC = () => {
 };
 
 const Container = styled.div`
-  height: 500px;
+  height: 100vh;
 
   display: flex;
   flex-direction: column;
 `;
 
-const InfoContainer = styled.div<{ color: string }>`
-  height: 100px;
-  padding: 8px;
-
-  ${({ color }) =>
-    color &&
-    css`
-      background-color: ${color};
-    `}
-`;
-
 const ChatsConainer = styled.div`
-  height: 400px;
-  padding-bottom: 12px;
+  height: calc(100vh - 100px);
+  padding-bottom: 10px;
 `;
 
 export default App;

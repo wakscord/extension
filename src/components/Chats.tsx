@@ -32,7 +32,6 @@ const sortChats = (prev: Chat[], next: Chat[]) => {
 
 const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  // const spinnerRef = useRef<HTMLDivElement>(null);
 
   const { ref: spinnerRef, inView } = useInView({
     threshold: 0,
@@ -44,11 +43,11 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
   const [before, setBefore] = useState<number | null>(null);
 
   const [isFirstLoaded, setIsFirstLoaded] = useState(false);
+  const [isEnd, setIsEnd] = useState(false);
 
   const [oldHeight, setOldHeight] = useState(0);
   const [oldScroll, setOldScroll] = useState(0);
 
-  // scroll loader
   useEffect(() => {
     if (inView) {
       (async () => {
@@ -59,6 +58,11 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
         );
 
         const data: Chat[] = await response.json();
+
+        if (!data.length) {
+          setIsEnd(true);
+          return;
+        }
 
         setBefore(data[0].id);
         setChats((prev) => sortChats(prev, data));
@@ -82,7 +86,6 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
   };
 
   useEffect(() => {
-    // first load
     (async () => {
       const response = await fetch(
         `https://api.wakscord.xyz/extension/${twitchId}/chats`
@@ -132,10 +135,16 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
 
   return (
     <Container ref={containerRef} color={getColor(name).bottom}>
-      {isFirstLoaded && (
+      {isFirstLoaded && !isEnd && (
         <SpinnerContainer ref={spinnerRef}>
           <Spinner />
         </SpinnerContainer>
+      )}
+
+      {isEnd && (
+        <EndMessage>
+          <span>기록된 모든 채팅을 읽으셨군요!</span>
+        </EndMessage>
       )}
 
       <InnerContainer>
@@ -193,6 +202,14 @@ const InnerContainer = styled.div`
 `;
 
 const SpinnerContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  height: 100px;
+`;
+
+const EndMessage = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;

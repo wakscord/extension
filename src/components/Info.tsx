@@ -37,7 +37,7 @@ const Info: FC<InfoProps> = ({ channel }) => {
 };
 
 const Container = styled.div<{ color: string }>`
-  height: 100px;
+  height: 90px;
   padding: 10px;
 
   display: flex;
@@ -68,8 +68,6 @@ const Name = styled.span`
   font-size: 2rem;
   font-weight: 800;
 `;
-
-const Text = styled.span``;
 
 const Link = styled.a`
   text-decoration: underline;
