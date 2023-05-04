@@ -37,14 +37,16 @@ const Info: FC<InfoProps> = ({ channel }) => {
 };
 
 const Container = styled.div<{ color: string }>`
-  height: 90px;
+  height: 74px;
   padding: 10px;
 
   display: flex;
   align-items: center;
 
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+
+  box-sizing: border-box;
 
   ${({ color }) =>
     color &&
@@ -57,6 +59,8 @@ const Texts = styled.div<{ color: string }>`
   display: flex;
   flex-direction: column;
 
+  margin-left: 3px;
+
   ${({ color }) =>
     color &&
     css`
@@ -65,11 +69,13 @@ const Texts = styled.div<{ color: string }>`
 `;
 
 const Name = styled.span`
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: 800;
 `;
 
 const Link = styled.a`
+  font-size: 0.9rem;
+
   text-decoration: underline;
   color: white;
 `;

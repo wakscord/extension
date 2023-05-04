@@ -56,7 +56,9 @@ const Container = styled.div`
 `;
 
 const ChatsConainer = styled.div`
-  height: calc(100vh - 100px);
+  height: calc(100vh - 74px);
+
+  box-sizing: border-box;
   padding-bottom: 10px;
 `;
 
