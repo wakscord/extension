@@ -10,6 +10,10 @@ const Refresh: FC<RefreshProps> = ({ onClick: onClickCallback }) => {
   const [loading, setLoading] = useState(false);
 
   const onClick = async () => {
+    if (loading) {
+      return;
+    }
+
     setLoading(true);
 
     await onClickCallback();
@@ -44,7 +48,7 @@ const RefreshButton = styled.div`
 
 const RefreshIcon = styled(RefreshIconSVG)`
   &.loading {
-    animation: spin 300ms linear infinite;
+    animation: spin 300ms ease-in-out infinite;
   }
 
   @keyframes spin {

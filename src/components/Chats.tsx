@@ -6,6 +6,8 @@ import { getColor } from "../colors";
 import Message from "./discord/Message";
 import Spinner from "./discord/Spinner";
 
+import Refresh from "./Refresh";
+
 interface Chat {
   id: number;
   content: string;
@@ -75,7 +77,9 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
     }
   }, [inView]);
 
-  const interval = async () => {
+  const loadRecent = async (manual = false) => {
+    if (!manual && localStorage.getItem("autoRefresh") !== "true") return;
+
     const response = await fetch(
       `https://api.wakscord.xyz/extension/${twitchId}/chats`
     );
@@ -110,7 +114,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
       }
     })();
 
-    const intervalId = setInterval(interval, 10000);
+    const intervalId = setInterval(loadRecent, 10000);
 
     return () => clearInterval(intervalId);
   }, []);
@@ -157,6 +161,14 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
             before={chats[index - 1]}
           />
         ))}
+
+        <RefreshContainer>
+          <Refresh
+            onClick={async () => {
+              await loadRecent(true);
+            }}
+          />
+        </RefreshContainer>
       </InnerContainer>
     </Container>
   );
@@ -216,6 +228,14 @@ const EndMessage = styled.div`
   align-items: center;
 
   height: 100px;
+`;
+
+const RefreshContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  margin-top: 16px;
 `;
 
 export default Chats;
