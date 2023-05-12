@@ -5,11 +5,7 @@ import { ReactComponent as WakscordLogo } from "../assets/wakscord.svg";
 const Default: FC = () => {
   return (
     <Container>
-      <LogoContainer
-        onClick={() => {
-          window.open("https://wakscord.xyz", "_blank");
-        }}
-      >
+      <LogoContainer href="https://wakscord.xyz" target="_blank">
         <WakscordLogo width={350} fill="#6db69e" />
       </LogoContainer>
     </Container>
@@ -27,7 +23,8 @@ const Container = styled.div`
   justify-content: center;
 `;
 
-const LogoContainer = styled.div`
+const LogoContainer = styled.a`
+  text-decoration: none;
   cursor: pointer;
 `;
 
