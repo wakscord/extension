@@ -25,11 +25,7 @@ const Info: FC<InfoProps> = ({ channel }) => {
         )}
       </Texts>
 
-      <LogoContainer
-        onClick={() => {
-          window.open("https://wakscord.xyz", "_blank");
-        }}
-      >
+      <LogoContainer href="https://wakscord.xyz" target="_blank">
         <WakscordLogo width={80} fill={colors.text} />
       </LogoContainer>
     </Container>
@@ -80,7 +76,9 @@ const Link = styled.a`
   color: white;
 `;
 
-const LogoContainer = styled.div`
+const LogoContainer = styled.a`
+  text-decoration: none;
+
   margin-left: auto;
 
   display: flex;
