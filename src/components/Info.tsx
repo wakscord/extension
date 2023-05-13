@@ -43,6 +43,7 @@ const Container = styled.div<{ color: string }>`
   border-top-right-radius: 10px;
 
   box-sizing: border-box;
+  user-select: none;
 
   ${({ color }) =>
     color &&
