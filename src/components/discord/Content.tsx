@@ -2,6 +2,8 @@ import { FC, Fragment, ReactElement } from "react";
 import styled, { css } from "styled-components";
 import Emote, { EmoteImage } from "./Emote";
 
+const urlRegex = /https?:\/\/[^\s]+/g;
+
 interface ContentProps {
   content: string;
   emotes?: {
@@ -26,6 +28,18 @@ const Content: FC<ContentProps> = ({ content, emotes: rawEmotes }) => {
   let index = 0;
   let words = "";
 
+  const createTextFragment = (text: string) => {
+    if (text.match(urlRegex)) {
+      return (
+        <UrlFragment href={text} target="_blank">
+          {text}
+        </UrlFragment>
+      );
+    }
+
+    return <TextFragment>{text}</TextFragment>;
+  };
+
   content.split(" ").forEach((word) => {
     const start = index;
     const end = index + word.length - 1;
@@ -35,7 +49,7 @@ const Content: FC<ContentProps> = ({ content, emotes: rawEmotes }) => {
 
     if (emotes[idx]) {
       if (words) {
-        render.push(<TextFragment>{words}</TextFragment>);
+        render.push(createTextFragment(words));
 
         words = "";
         bigEmote = false;
@@ -49,7 +63,7 @@ const Content: FC<ContentProps> = ({ content, emotes: rawEmotes }) => {
   });
 
   if (words) {
-    render.push(<TextFragment>{words}</TextFragment>);
+    render.push(createTextFragment(words));
     bigEmote = false;
   }
 
@@ -79,6 +93,16 @@ const Container = styled.span<{ small: boolean }>`
 
 const TextFragment = styled.span`
   vertical-align: middle;
+
+  word-wrap: break-word;
+`;
+
+const UrlFragment = styled.a`
+  vertical-align: middle;
+  color: rgb(0, 168, 252);
+  text-decoration: none;
+
+  word-wrap: break-word;
 `;
 
 export default Content;
