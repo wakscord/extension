@@ -4,21 +4,15 @@ import moment from "moment";
 import "moment/dist/locale/ko";
 import styled, { css } from "styled-components";
 
+import { Chat, Wakzoo } from "../../interfaces";
 import Content from "./Content";
-
-interface Chat {
-  content: string;
-  time: string;
-  emotes?: {
-    [key: string]: string[];
-  };
-}
+import Embed from "./Embed";
 
 interface MessageProp {
   id: string;
   name: string;
-  chat: Chat;
-  before?: Chat;
+  chat: Chat | Wakzoo;
+  before?: Chat | Wakzoo;
 }
 
 const Message: FC<MessageProp> = ({ id, name, chat, before }) => {
@@ -50,7 +44,13 @@ const Message: FC<MessageProp> = ({ id, name, chat, before }) => {
       )}
 
       <ContentContainer>
-        <Content content={chat.content} emotes={chat.emotes} />
+        <Content
+          content={"content" in chat ? chat.content : chat.url}
+          emotes={"emotes" in chat ? chat.emotes : undefined}
+        />
+
+        {"embeds" in chat &&
+          chat.embeds.map((embed, idx) => <Embed key={idx} embed={embed} />)}
       </ContentContainer>
     </Container>
   );
