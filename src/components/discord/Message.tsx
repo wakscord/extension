@@ -45,12 +45,18 @@ const Message: FC<MessageProp> = ({ id, name, chat, before }) => {
 
       <ContentContainer>
         <Content
-          content={"content" in chat ? chat.content : chat.url}
-          emotes={"emotes" in chat ? chat.emotes : undefined}
+          content={chat.content}
+          emotes={
+            chat.author !== "wakzoo" && chat.data
+              ? (chat as Chat).data
+              : undefined
+          }
         />
 
-        {"embeds" in chat &&
-          chat.embeds.map((embed, idx) => <Embed key={idx} embed={embed} />)}
+        {chat.author === "wakzoo" &&
+          (chat as Wakzoo).data.map((embed, idx) => (
+            <Embed key={idx} embed={embed} />
+          ))}
       </ContentContainer>
     </Container>
   );

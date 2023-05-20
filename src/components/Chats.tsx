@@ -6,7 +6,7 @@ import { getColor } from "../colors";
 import Message from "./discord/Message";
 import Spinner from "./discord/Spinner";
 
-import { Chat, ChatsResponse, Wakzoo } from "../interfaces";
+import { Chat, Wakzoo } from "../interfaces";
 import Refresh from "./Refresh";
 
 interface ChatsProps {
@@ -41,7 +41,6 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
 
   const [last, setLast] = useState<number | null>(null);
   const [before, setBefore] = useState<number | null>(null);
-  const [wakzooBefore, setWakzooBefore] = useState<number | null>(null);
 
   const [isFirstLoaded, setIsFirstLoaded] = useState(false);
   const [isEnd, setIsEnd] = useState(false);
@@ -53,21 +52,20 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
     if (inView) {
       (async () => {
         const response = await fetch(
-          `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?chatsBefore=${
+          `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?before=${
             before ? before : ""
-          }&wakzooBefore=${wakzooBefore ? wakzooBefore : ""}`
+          }`
         );
 
-        const data: ChatsResponse = await response.json();
+        const data: (Chat | Wakzoo)[] = await response.json();
 
-        if (!data.chats.length) {
+        if (!data.length) {
           setIsEnd(true);
           return;
         }
 
-        setBefore(data.chats[0].id);
-        setWakzooBefore(data.wakzoo.length && data.wakzoo[0].id);
-        setChats((prev) => sortChats(prev, data.chats.concat(data.wakzoo)));
+        setBefore(data[0].id);
+        setChats((prev) => sortChats(prev, data));
 
         if (containerRef.current) {
           setOldHeight(containerRef.current.scrollHeight);
@@ -84,9 +82,9 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
       `https://api.wakscord.xyz/extension/${twitchId}/chatsv2`
     );
 
-    const data: ChatsResponse = await response.json();
+    const data = await response.json();
 
-    setChats((prev) => sortChats(prev, data.chats.concat(data.wakzoo)));
+    setChats((prev) => sortChats(prev, data));
   };
 
   useEffect(() => {
@@ -95,12 +93,11 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
         `https://api.wakscord.xyz/extension/${twitchId}/chatsv2`
       );
 
-      const data: ChatsResponse = await response.json();
+      const data: (Chat | Wakzoo)[] = await response.json();
 
       setIsFirstLoaded(true);
-      setBefore(data.chats[0].id);
-      setWakzooBefore(data.wakzoo.length && data.wakzoo[0].id);
-      setChats((prev) => sortChats(prev, data.chats.concat(data.wakzoo)));
+      setBefore(data[0].id);
+      setChats((prev) => sortChats(prev, data));
 
       if (containerRef.current) {
         setOldHeight(containerRef.current.scrollHeight);
@@ -172,6 +169,8 @@ const Container = styled.div<{ color: string }>`
   height: 100%;
   overflow-x: hidden;
   overflow-y: scroll;
+
+  padding-right: 10px;
 
   &::-webkit-scrollbar {
     width: 16px;

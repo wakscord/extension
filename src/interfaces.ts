@@ -1,21 +1,18 @@
-export interface ChatsResponse {
-  chats: Chat[];
-  wakzoo: any;
-}
-
 export interface Chat {
   id: number;
+  author: string;
   content: string;
-  time: string;
-  emotes?: {
+  data?: {
     [key: string]: string[];
   };
+  time: string;
 }
 
 export interface Wakzoo {
   id: number;
-  url: string;
-  embeds: Embed[];
+  author: string;
+  content: string;
+  data: Embed[];
   time: string;
 }
 
