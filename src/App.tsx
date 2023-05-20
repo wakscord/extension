@@ -31,7 +31,7 @@ const App: FC = () => {
         `https://api.wakscord.xyz/extension/${channelId}`
       );
 
-      const data = (await response.json()) as Channel;
+      const data = (await response.json()) as Omit<Channel, "twitchId">;
 
       setChannel({
         twitchId: channelId,
