@@ -1,14 +1,16 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import { useRecoilState } from "recoil";
 import styled, { keyframes } from "styled-components";
 
 import { ReactComponent as CloseIconSVG } from "../assets/close.svg";
 import { settingsState } from "../states/settings";
+import Slider from "./discord/Slider";
 
 interface SettingsProps {}
 
 const Settings: FC<SettingsProps> = ({}) => {
   const [settings, setSettings] = useRecoilState(settingsState);
+  const [toggle, setToggle] = useState(false);
 
   return (
     <Container isOpen={settings.isOpen}>
@@ -26,6 +28,7 @@ const Settings: FC<SettingsProps> = ({}) => {
       </CloseButtonContainer>
       <InnerContainer>
         <Title>설정</Title>
+        <Slider value={toggle} onChange={setToggle} />
         <span>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras non elit
           ut mauris laoreet vestibulum. Suspendisse at sem aliquet, laoreet
