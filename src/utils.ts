@@ -4,3 +4,7 @@ export const decodeText = (text: string): string => {
       .documentElement.textContent || ""
   );
 };
+
+export const mergeFlag = (values: number[]): number => {
+  return values.reduce((acc, cur) => acc | cur, 0);
+};

@@ -144,13 +144,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
 
       <InnerContainer>
         {chats.map((chat, index) => (
-          <Message
-            key={index}
-            id={id}
-            name={name}
-            chat={chat}
-            before={chats[index - 1]}
-          />
+          <Message key={index} id={id} chat={chat} before={chats[index - 1]} />
         ))}
 
         <RefreshContainer>

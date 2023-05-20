@@ -4,23 +4,23 @@ import moment from "moment";
 import "moment/dist/locale/ko";
 import styled, { css } from "styled-components";
 
+import { streamers } from "../../constants";
 import { Chat, Wakzoo } from "../../interfaces";
 import Content from "./Content";
 import Embed from "./Embed";
 
 interface MessageProp {
   id: string;
-  name: string;
   chat: Chat | Wakzoo;
   before?: Chat | Wakzoo;
 }
 
-const Message: FC<MessageProp> = ({ id, name, chat, before }) => {
+const Message: FC<MessageProp> = ({ id, chat, before }) => {
   const isCompact = before
-    ? new Date(chat.time).getTime() - new Date(before.time).getTime() <
+    ? (new Date(chat.time).getTime() - new Date(before.time).getTime() <
       5 * 60 * 1000
-      ? true
-      : false
+        ? true
+        : false) && chat.author === before.author
     : false;
 
   return (
@@ -29,10 +29,20 @@ const Message: FC<MessageProp> = ({ id, name, chat, before }) => {
         <HoverInfo>{moment(chat.time).format("a h:mm")}</HoverInfo>
       ) : (
         <>
-          <Avatar src={`https://api.wakscord.xyz/avatar/${id}.png`} />
+          <Avatar
+            src={
+              chat.author === "wakzoo"
+                ? `https://api.wakscord.xyz/avatar/${id}.png`
+                : `https://api.wakscord.xyz/avatar/${
+                    streamers[chat.author].id
+                  }.png`
+            }
+          />
 
           <Header>
-            <Username>{name}</Username>
+            <Username>
+              {chat.author === "wakzoo" ? "왁물원 글 업로드" : chat.author}
+            </Username>
             <Info>
               {new Date().getTime() - new Date(chat.time).getTime() >
               24 * 60 * 60 * 1000
