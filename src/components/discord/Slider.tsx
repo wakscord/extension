@@ -5,30 +5,16 @@ import { FC, useEffect, useState } from "react";
 import styled from "styled-components";
 
 interface SliderProps {
-  value?: boolean;
-  onChange?: (value: boolean) => void;
+  value: boolean;
+  onChange: (value: boolean) => void;
 }
 
 const Slider: FC<SliderProps> = ({ value, onChange }) => {
-  const [active, setActive] = useState(false);
-
-  const changeActive = () => {
-    setActive(!active);
-    onChange && onChange(!active);
-  };
-
-  useEffect(() => {
-    if (value !== undefined) {
-      setActive(!!value);
-    }
-  }, [value]);
-
   return (
     <Container
-      onClick={changeActive}
       style={{
-        backgroundColor: active ? color.active : color.inactive,
-        justifyContent: active ? "flex-end" : "flex-start",
+        backgroundColor: value ? color.active : color.inactive,
+        justifyContent: value ? "flex-end" : "flex-start",
       }}
     >
       <Handle
@@ -43,12 +29,18 @@ const Slider: FC<SliderProps> = ({ value, onChange }) => {
           {pathList.map((path, index) => (
             <motion.path
               key={index}
-              animate={active ? "active" : "inactive"}
+              animate={value ? "active" : "inactive"}
               variants={path}
             />
           ))}
         </motion.svg>
       </Handle>
+      <Input
+        type="checkbox"
+        role="switch"
+        defaultChecked={value}
+        onChange={(event) => onChange(event.target.checked)}
+      />
     </Container>
   );
 };
@@ -82,6 +74,8 @@ const pathList: Variants[] = [
 ];
 
 const Container = styled(motion.div)`
+  position: relative;
+
   margin: 10px 10px;
   padding: 0 3px;
 
@@ -103,6 +97,16 @@ const Handle = styled(motion.div)`
   height: 18px;
   border-radius: 50%;
   background-color: #fff;
+`;
+
+const Input = styled.input`
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  margin: 0;
 `;
 
 export default Slider;
