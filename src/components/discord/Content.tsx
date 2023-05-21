@@ -103,6 +103,10 @@ const UrlFragment = styled.a`
   text-decoration: none;
 
   word-wrap: break-word;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 export default Content;
