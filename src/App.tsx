@@ -46,7 +46,7 @@ const App: FC = () => {
 
   return (
     <>
-      <Settings />
+      <Settings channel={channel} />
 
       <Container>
         <SettingButtonContainer>

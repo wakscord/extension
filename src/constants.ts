@@ -16,3 +16,5 @@ export const streamers: Streamers = {
   천양: { flag: 128, id: "chunyangkr" },
   뢴트게늄: { flag: 256, id: "111roentgenium" },
 };
+
+export const streamerNames = Object.keys(streamers);

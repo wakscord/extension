@@ -76,7 +76,6 @@ const pathList: Variants[] = [
 const Container = styled(motion.div)`
   position: relative;
 
-  margin: 10px 10px;
   padding: 0 3px;
 
   box-sizing: border-box;
