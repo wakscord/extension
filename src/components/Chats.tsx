@@ -119,6 +119,13 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
       const data: (Chat | Wakzoo)[] = await response.json();
 
       setIsFirstLoaded(true);
+
+      if (data.length === 0) {
+        setBefore(null);
+        setChats([]);
+        return;
+      }
+
       setBefore(data[0].id);
       setChats(data);
 
