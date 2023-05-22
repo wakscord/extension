@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useInView } from "react-intersection-observer";
@@ -8,6 +8,10 @@ import Spinner from "./discord/Spinner";
 
 import { Chat, Wakzoo } from "../interfaces";
 import Refresh from "./Refresh";
+import { useRecoilValue } from "recoil";
+import { settingsState } from "../states/settings";
+import { mergeFlag } from "../utils";
+import { streamers } from "../constants";
 
 interface ChatsProps {
   id: string;
@@ -48,13 +52,23 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
   const [oldHeight, setOldHeight] = useState(0);
   const [oldScroll, setOldScroll] = useState(0);
 
+  const settings = useRecoilValue(settingsState);
+
+  const authors = useMemo(() => {
+    const flags = Object.entries(settings.authors[name])
+      .filter(([, value]) => value)
+      .map(([key]) => streamers[key].flag);
+
+    return mergeFlag(flags);
+  }, [settings.authors]);
+
   useEffect(() => {
     if (inView) {
       (async () => {
         const response = await fetch(
           `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?before=${
             before ? before : ""
-          }`
+          }&authors=${authors}&noWakzoo=${!settings.wakzoo}`
         );
 
         const data: (Chat | Wakzoo)[] = await response.json();
@@ -75,40 +89,45 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
     }
   }, [inView]);
 
-  const loadRecent = async (manual = false) => {
-    if (!manual && localStorage.getItem("autoRefresh") !== "true") return;
+  const loadRecent = useCallback(
+    async (manual = false) => {
+      if (!manual && !settings.autoRefresh) return;
 
-    const response = await fetch(
-      `https://api.wakscord.xyz/extension/${twitchId}/chatsv2`
-    );
+      const response = await fetch(
+        `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?authors=${authors}&noWakzoo=${!settings.wakzoo}`
+      );
 
-    const data = await response.json();
+      const data = await response.json();
 
-    setChats((prev) => sortChats(prev, data));
-  };
+      setChats((prev) => sortChats(prev, data));
+    },
+    [settings.autoRefresh]
+  );
+
+  useEffect(() => {
+    const intervalId = setInterval(loadRecent, 10000);
+
+    return () => clearInterval(intervalId);
+  }, [loadRecent]);
 
   useEffect(() => {
     (async () => {
       const response = await fetch(
-        `https://api.wakscord.xyz/extension/${twitchId}/chatsv2`
+        `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?authors=${authors}&noWakzoo=${!settings.wakzoo}`
       );
 
       const data: (Chat | Wakzoo)[] = await response.json();
 
       setIsFirstLoaded(true);
       setBefore(data[0].id);
-      setChats((prev) => sortChats(prev, data));
+      setChats(data);
 
       if (containerRef.current) {
         setOldHeight(containerRef.current.scrollHeight);
         setOldScroll(containerRef.current.scrollTop);
       }
     })();
-
-    const intervalId = setInterval(loadRecent, 10000);
-
-    return () => clearInterval(intervalId);
-  }, []);
+  }, [authors, settings.wakzoo]);
 
   useEffect(() => {
     if (containerRef.current) {
