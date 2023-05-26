@@ -1,6 +1,5 @@
-import { Variants } from "framer-motion";
-import { motion } from "framer-motion";
-import { FC, useEffect, useState } from "react";
+import { Variants, motion } from "framer-motion";
+import { FC } from "react";
 
 import styled from "styled-components";
 
@@ -12,6 +11,8 @@ interface SliderProps {
 const Slider: FC<SliderProps> = ({ value, onChange }) => {
   return (
     <Container
+      layout
+      layoutRoot
       style={{
         backgroundColor: value ? color.active : color.inactive,
         justifyContent: value ? "flex-end" : "flex-start",
