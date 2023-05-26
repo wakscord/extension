@@ -6,12 +6,12 @@ import { getColor } from "../colors";
 import Message from "./discord/Message";
 import Spinner from "./discord/Spinner";
 
-import { Chat, Wakzoo } from "../interfaces";
-import Refresh from "./Refresh";
 import { useRecoilValue } from "recoil";
+import { streamers } from "../constants";
+import { Chat, Wakzoo } from "../interfaces";
 import { settingsState } from "../states/settings";
 import { mergeFlag } from "../utils";
-import { streamers } from "../constants";
+import Refresh from "./Refresh";
 
 interface ChatsProps {
   id: string;
@@ -68,7 +68,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
         const response = await fetch(
           `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?before=${
             before ? before : ""
-          }&authors=${authors}&noWakzoo=${!settings.wakzoo}`
+          }&authors=${authors}&noWakzoo=${!settings.wakzoos[name]}`
         );
 
         const data: (Chat | Wakzoo)[] = await response.json();
@@ -94,7 +94,8 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
       if (!manual && !settings.autoRefresh) return;
 
       const response = await fetch(
-        `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?authors=${authors}&noWakzoo=${!settings.wakzoo}`
+        `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?authors=${authors}&noWakzoo=${!settings
+          .wakzoos[name]}`
       );
 
       const data = await response.json();
@@ -112,8 +113,10 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
 
   useEffect(() => {
     (async () => {
+      console.log(settings);
       const response = await fetch(
-        `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?authors=${authors}&noWakzoo=${!settings.wakzoo}`
+        `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?authors=${authors}&noWakzoo=${!settings
+          .wakzoos[name]}`
       );
 
       const data: (Chat | Wakzoo)[] = await response.json();
@@ -134,7 +137,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
         setOldScroll(containerRef.current.scrollTop);
       }
     })();
-  }, [authors, settings.wakzoo]);
+  }, [authors, settings.wakzoos[name]]);
 
   useEffect(() => {
     if (containerRef.current) {

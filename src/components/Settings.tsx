@@ -1,13 +1,13 @@
-import { FC, useEffect, useMemo, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { FC, useEffect } from "react";
+import { useRecoilState } from "recoil";
 import styled, { keyframes } from "styled-components";
 
+import { Controller, useForm } from "react-hook-form";
 import { ReactComponent as CloseIconSVG } from "../assets/close.svg";
+import { streamerNames } from "../constants";
+import { Channel } from "../states/channel";
 import { Settings, settingsState } from "../states/settings";
 import Slider from "./discord/Slider";
-import { Controller, useForm } from "react-hook-form";
-import { streamerNames } from "../constants";
-import { Channel, channelState } from "../states/channel";
 
 interface SettingsProps {
   channel: Channel;
@@ -27,21 +27,13 @@ const Settings: FC<SettingsProps> = ({ channel }) => {
       setSettings((settings) => ({ ...settings, ...data }));
 
       localStorage.setItem("autoRefresh", JSON.stringify(data.autoRefresh));
-      localStorage.setItem("wakzoo", JSON.stringify(data.wakzoo));
+      localStorage.setItem("wakzoos", JSON.stringify(data.wakzoos));
       localStorage.setItem("authors", JSON.stringify(data.authors));
     }
 
     const subscription = watch(() => handleSubmit(onSubmit)());
     return () => subscription.unsubscribe();
   }, [handleSubmit, watch]);
-
-  const sortedStreamerNames = useMemo(
-    () => [
-      channel.name,
-      ...streamerNames.filter((streamerName) => streamerName !== channel.name),
-    ],
-    [channel.name]
-  );
 
   return (
     <Container isOpen={isOpen}>
@@ -77,24 +69,22 @@ const Settings: FC<SettingsProps> = ({ channel }) => {
         <Hr />
         <Controller
           control={control}
-          name="wakzoo"
+          name={`wakzoos.${channel.name}`}
           render={({ field: { value, onChange } }) => (
             <FormControl>
               <FormGroup>
                 <FormLabel style={{ marginBottom: "8px" }}>
                   왁물원 글 보여주기
                 </FormLabel>
-                <FormHelperText>
-                  왁물원 게시글 링크를 채팅 이력으로 보여줍니다.
-                </FormHelperText>
+                <FormHelperText>왁물원 글을 채팅에 보여줍니다.</FormHelperText>
               </FormGroup>
               <Slider value={value} onChange={onChange} />
             </FormControl>
           )}
         />
         <Hr />
-        <FormHelperText>다른 왁타버스 스크리머 채팅 표시 여부</FormHelperText>
-        {sortedStreamerNames.map((name) => (
+        <FormHelperText>채팅 표시 여부</FormHelperText>
+        {streamerNames.map((name) => (
           <Controller
             key={name}
             control={control}
@@ -173,7 +163,7 @@ const InnerContainer = styled.div`
 
   user-select: none;
 
-  height: calc(100% - 30px);
+  height: calc(100% - 60px);
   overflow-y: scroll;
 
   &::-webkit-scrollbar {
