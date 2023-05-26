@@ -8,7 +8,7 @@ import Default from "./components/Default";
 import Info from "./components/Info";
 
 import Settings from "./components/Settings";
-import { channelState } from "./states/channel";
+import { Channel, channelState } from "./states/channel";
 import { settingsState } from "./states/settings";
 
 const App: FC = () => {
@@ -16,22 +16,28 @@ const App: FC = () => {
   const [settings, setSettings] = useRecoilState(settingsState);
 
   useEffect(() => {
-    Twitch.ext.onAuthorized((auth) => {
-      const { channelId } = auth;
+    if (import.meta.env.PROD) {
+      Twitch.ext.onAuthorized(({ channelId }) => {
+        initializeChannelState(channelId);
+      });
+    } else {
+      const channelIdForDevelopment =
+        import.meta.env.VITE_CHANNEL_ID ?? "195641865";
+      initializeChannelState(channelIdForDevelopment);
+    }
 
-      (async () => {
-        const response = await fetch(
-          `https://api.wakscord.xyz/extension/${channelId}`
-        );
+    async function initializeChannelState(channelId: string) {
+      const response = await fetch(
+        `https://api.wakscord.xyz/extension/${channelId}`
+      );
 
-        const data = await response.json();
+      const data = (await response.json()) as Omit<Channel, "twitchId">;
 
-        setChannel({
-          twitchId: channelId,
-          ...data,
-        });
-      })();
-    });
+      setChannel({
+        twitchId: channelId,
+        ...data,
+      });
+    }
   }, []);
 
   if (!channel || !channel.id) {
@@ -40,7 +46,7 @@ const App: FC = () => {
 
   return (
     <>
-      <Settings />
+      <Settings channel={channel} />
 
       <Container>
         <SettingButtonContainer>
