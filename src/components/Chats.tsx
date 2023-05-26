@@ -113,7 +113,6 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
 
   useEffect(() => {
     (async () => {
-      console.log(settings);
       const response = await fetch(
         `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?authors=${authors}&noWakzoo=${!settings
           .wakzoos[name]}`
