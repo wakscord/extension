@@ -6,6 +6,7 @@ import styled, { css } from "styled-components";
 
 import { streamers } from "../../constants";
 import { Chat, Wakzoo } from "../../interfaces";
+import Badge from "./Badge";
 import Content from "./Content";
 import Embed from "./Embed";
 
@@ -31,18 +32,21 @@ const Message: FC<MessageProp> = ({ id, chat, before }) => {
         <>
           <Avatar
             src={
-              chat.author === "wakzoo"
-                ? `https://api.wakscord.xyz/avatar/${id}.png`
-                : `https://api.wakscord.xyz/avatar/${
+              Object.keys(streamers).includes(chat.author)
+                ? `https://api.wakscord.xyz/avatar/${
                     streamers[chat.author].id
                   }.png`
+                : `https://api.wakscord.xyz/avatar/${id}.png`
             }
           />
 
           <Header>
-            <Username>
-              {chat.author === "wakzoo" ? "왁물원 글 업로드" : chat.author}
-            </Username>
+            <Username>{chat.author}</Username>
+
+            {!Object.keys(streamers).includes(chat.author) && (
+              <Badge>알림</Badge>
+            )}
+
             <Info>
               {new Date().getTime() - new Date(chat.time).getTime() >
               24 * 60 * 60 * 1000
@@ -56,14 +60,10 @@ const Message: FC<MessageProp> = ({ id, chat, before }) => {
       <ContentContainer>
         <Content
           content={chat.content}
-          emotes={
-            chat.author !== "wakzoo" && chat.data
-              ? (chat as Chat).data
-              : undefined
-          }
+          emotes={Array.isArray(chat.data) ? undefined : (chat as Chat).data}
         />
 
-        {chat.author === "wakzoo" &&
+        {Array.isArray(chat.data) &&
           (chat as Wakzoo).data.map((embed, idx) => (
             <Embed key={idx} embed={embed} />
           ))}
@@ -127,6 +127,9 @@ const Avatar = styled.img`
 
 const Header = styled.div`
   padding-left: 50px;
+
+  display: flex;
+  align-items: center;
 `;
 
 const Username = styled.span`

@@ -68,7 +68,9 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
         const response = await fetch(
           `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?before=${
             before ? before : ""
-          }&authors=${authors}&noWakzoo=${!settings.wakzoos[name]}`
+          }&authors=${authors}&noWakzoo=${!settings.wakzoos[name]}&notify=${
+            settings.notify
+          }`
         );
 
         const data: (Chat | Wakzoo)[] = await response.json();
@@ -95,7 +97,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
 
       const response = await fetch(
         `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?authors=${authors}&noWakzoo=${!settings
-          .wakzoos[name]}`
+          .wakzoos[name]}&notify=${settings.notify}`
       );
 
       const data = await response.json();
@@ -115,7 +117,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
     (async () => {
       const response = await fetch(
         `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?authors=${authors}&noWakzoo=${!settings
-          .wakzoos[name]}`
+          .wakzoos[name]}&notify=${settings.notify}`
       );
 
       const data: (Chat | Wakzoo)[] = await response.json();
@@ -136,7 +138,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
         setOldScroll(containerRef.current.scrollTop);
       }
     })();
-  }, [authors, settings.wakzoos[name]]);
+  }, [authors, settings.wakzoos[name], settings.notify]);
 
   useEffect(() => {
     if (containerRef.current) {

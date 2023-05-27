@@ -28,6 +28,7 @@ const Settings: FC<SettingsProps> = ({ channel }) => {
 
       localStorage.setItem("autoRefresh", JSON.stringify(data.autoRefresh));
       localStorage.setItem("wakzoos", JSON.stringify(data.wakzoos));
+      localStorage.setItem("notify", JSON.stringify(data.notify));
       localStorage.setItem("authors", JSON.stringify(data.authors));
     }
 
@@ -77,6 +78,22 @@ const Settings: FC<SettingsProps> = ({ channel }) => {
                   왁물원 글 보여주기
                 </FormLabel>
                 <FormHelperText>왁물원 글을 채팅에 보여줍니다.</FormHelperText>
+              </FormGroup>
+              <Slider value={value} onChange={onChange} />
+            </FormControl>
+          )}
+        />
+        <Hr />
+        <Controller
+          control={control}
+          name="notify"
+          render={({ field: { value, onChange } }) => (
+            <FormControl>
+              <FormGroup>
+                <FormLabel style={{ marginBottom: "8px" }}>추가 알림</FormLabel>
+                <FormHelperText>
+                  추가적인 알림을 채팅에 보여줍니다.
+                </FormHelperText>
               </FormGroup>
               <Slider value={value} onChange={onChange} />
             </FormControl>

@@ -5,6 +5,7 @@ export interface Settings {
   isOpen: boolean;
   autoRefresh: boolean;
   wakzoos: Wakzoos;
+  notify: boolean;
   authors: Authors;
 }
 
@@ -13,6 +14,7 @@ type Wakzoos = Record<string, boolean>;
 
 const authors = localStorage.getItem("authors");
 const wakzoos = localStorage.getItem("wakzoos");
+const notify = localStorage.getItem("notify");
 
 const initialAuthorsValue = Object.fromEntries(
   streamerNames.map((name) => [
@@ -35,6 +37,7 @@ export const settingsState = atom<Settings>({
     isOpen: false,
     autoRefresh: localStorage.getItem("autoRefresh") === "true",
     wakzoos: wakzoos ? (JSON.parse(wakzoos) as Wakzoos) : initialWakzoosValue,
+    notify: notify ? notify === "true" : true,
     authors: authors ? (JSON.parse(authors) as Authors) : initialAuthorsValue,
   },
 });
