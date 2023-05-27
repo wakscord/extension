@@ -1,17 +1,17 @@
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import styled from 'styled-components';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import styled from "styled-components";
 
-import { useInView } from 'react-intersection-observer';
-import { getColor } from '../colors';
-import Message from './discord/Message';
-import Skeleton from './discord/Skeleton';
+import { useInView } from "react-intersection-observer";
+import { getColor } from "../colors";
+import Message from "./discord/Message";
+import Skeleton from "./discord/Skeleton";
 
-import { useRecoilValue } from 'recoil';
-import { streamers } from '../constants';
-import { Chat, Wakzoo } from '../interfaces';
-import { settingsState } from '../states/settings';
-import { mergeFlag } from '../utils';
-import Refresh from './Refresh';
+import { useRecoilValue } from "recoil";
+import { streamers } from "../constants";
+import { Chat, Wakzoo } from "../interfaces";
+import { settingsState } from "../states/settings";
+import { mergeFlag } from "../utils";
+import Refresh from "./Refresh";
 
 interface ChatsProps {
   id: string;
@@ -67,7 +67,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
       (async () => {
         const response = await fetch(
           `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?before=${
-            before ? before : ''
+            before ? before : ""
           }&authors=${authors}&noWakzoo=${!settings.wakzoos[name]}&notify=${
             settings.notify
           }`
@@ -160,7 +160,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
 
   return (
     <Container ref={containerRef} color={getColor(name).bottom}>
-      {isFirstLoaded && !isEnd && (
+      {!isEnd && (
         <SkeletonContainer ref={skeletonRef}>
           <InnerContainer>
             <Skeleton />

@@ -1,5 +1,5 @@
-import styled from 'styled-components';
-import skeletons from '../../assets/skeletons.svg';
+import styled from "styled-components";
+import skeletons from "../../assets/skeletons.svg";
 
 export default function Spinner() {
   return (

@@ -1,14 +1,14 @@
-import { FC } from 'react';
+import { FC } from "react";
 
-import moment from 'moment';
-import 'moment/dist/locale/ko';
-import styled, { css } from 'styled-components';
+import moment from "moment";
+import "moment/dist/locale/ko";
+import styled, { css } from "styled-components";
 
-import { streamers } from '../../constants';
-import { Chat, Wakzoo } from '../../interfaces';
-import Badge from './Badge';
-import Content from './Content';
-import Embed from './Embed';
+import { streamers } from "../../constants";
+import { Chat, Wakzoo } from "../../interfaces";
+import Badge from "./Badge";
+import Content from "./Content";
+import Embed from "./Embed";
 
 interface MessageProp {
   id: string;
@@ -27,7 +27,7 @@ const Message: FC<MessageProp> = ({ id, chat, before }) => {
   return (
     <Container isCompact={isCompact}>
       {isCompact ? (
-        <HoverInfo>{moment(chat.time).format('a h:mm')}</HoverInfo>
+        <HoverInfo>{moment(chat.time).format("a h:mm")}</HoverInfo>
       ) : (
         <>
           <Avatar
@@ -50,8 +50,8 @@ const Message: FC<MessageProp> = ({ id, chat, before }) => {
             <Info>
               {new Date().getTime() - new Date(chat.time).getTime() >
               24 * 60 * 60 * 1000
-                ? moment(chat.time).format('yyyy.MM.DD. a h:mm')
-                : moment(chat.time).calendar()}{' '}
+                ? moment(chat.time).format("yyyy.MM.DD. a h:mm")
+                : moment(chat.time).calendar()}{" "}
             </Info>
           </Header>
         </>
