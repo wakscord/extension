@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { useInView } from "react-intersection-observer";
 import { getColor } from "../colors";
 import Message from "./discord/Message";
-import Spinner from "./discord/Spinner";
+import Skeleton from "./discord/Skeleton";
 
 import { useRecoilValue } from "recoil";
 import { streamers } from "../constants";
@@ -37,7 +37,7 @@ const sortChats = (prev: (Chat | Wakzoo)[], next: (Chat | Wakzoo)[]) => {
 const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { ref: spinnerRef, inView } = useInView({
+  const { ref: skeletonRef, inView } = useInView({
     threshold: 0,
   });
 
@@ -160,10 +160,12 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
 
   return (
     <Container ref={containerRef} color={getColor(name).bottom}>
-      {isFirstLoaded && !isEnd && (
-        <SpinnerContainer ref={spinnerRef}>
-          <Spinner />
-        </SpinnerContainer>
+      {!isEnd && (
+        <SkeletonContainer ref={skeletonRef}>
+          <InnerContainer>
+            <Skeleton />
+          </InnerContainer>
+        </SkeletonContainer>
       )}
 
       {isEnd && (
@@ -230,13 +232,8 @@ const InnerContainer = styled.div`
   padding-bottom: 10px;
 `;
 
-const SpinnerContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  margin-top: 100px;
-  height: 100px;
+const SkeletonContainer = styled.div`
+  height: 1044px;
 `;
 
 const EndMessage = styled.div`

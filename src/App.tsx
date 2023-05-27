@@ -56,7 +56,6 @@ const App: FC = () => {
       }
 
       setIsLoadSucceed(true);
-
       const data = (await response) as Omit<Channel, "twitchId">;
 
       setChannel({
