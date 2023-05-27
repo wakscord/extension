@@ -40,7 +40,7 @@ function isValidChannelStateResponse(value: any): value is ChannelState {
  *
  * @param channelId Twitch 채널 ID 값
  */
-async function fetchChannelState(channelId: string): Promise<any | null> {
+async function fetchChannelState(channelId: string) {
   return fetch(`https://api.wakscord.xyz/extension/${channelId}`)
     .then((res) => {
       if (!res.ok) {
