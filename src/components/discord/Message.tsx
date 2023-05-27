@@ -36,8 +36,11 @@ const Message: FC<MessageProp> = ({ id, chat, before }) => {
                 ? `https://api.wakscord.xyz/avatar/${
                     streamers[chat.author].id
                   }.png`
-                : `https://api.wakscord.xyz/avatar/${id}.png`
+                : `https://api.wakscord.xyz/avatar/${chat.author}`
             }
+            onError={(event) => {
+              event.currentTarget.src = `https://api.wakscord.xyz/avatar/${id}.png`;
+            }}
           />
 
           <Header>
