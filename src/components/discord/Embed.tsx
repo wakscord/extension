@@ -15,14 +15,21 @@ const Embed: FC<EmbedProp> = ({ embed }) => {
   return (
     <Container borderColor={embed.color}>
       {embed.author && <Author>{decodeText(embed.author.name)}</Author>}
-      <Title href={embed.url} target="_blank">
-        {embed.title}
-      </Title>
+      {embed.title &&
+        (embed.url ? (
+          <UrlTitle href={embed.url} target="_blank">
+            {embed.title}
+          </UrlTitle>
+        ) : (
+          <Title>{embed.title}</Title>
+        ))}
+
       {embed.description && (
         <Description>
           <Content content={embed.description} />
         </Description>
       )}
+
       <ParentField>
         {embed.fields?.map((field, idx) => (
           <Field inline={field.inline} key={idx}>
@@ -35,6 +42,7 @@ const Embed: FC<EmbedProp> = ({ embed }) => {
           </Field>
         ))}
       </ParentField>
+
       {embed.image && (
         <Image
           src={embed.image.url}
@@ -44,10 +52,12 @@ const Embed: FC<EmbedProp> = ({ embed }) => {
           }}
         />
       )}
+
+      {embed.footer && <Timestamp>{embed.footer.text}</Timestamp>}
+      {embed.timestamp && embed.footer && <span> • </span>}
       {embed.timestamp && (
         <Timestamp>{moment(embed.timestamp).calendar()}</Timestamp>
       )}
-      {embed.footer && <Timestamp>{embed.footer.text}</Timestamp>}
     </Container>
   );
 };
@@ -74,7 +84,14 @@ const Author = styled.div`
   color: #b9bbbe;
 `;
 
-const Title = styled.a`
+const Title = styled.span`
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 7px 0;
+`;
+
+const UrlTitle = styled.a`
   display: block;
   font-size: 1rem;
   font-weight: 700;
@@ -114,8 +131,11 @@ const Field = styled.div<{ inline: boolean }>`
 
 const FieldName = styled.span`
   font-size: 0.875rem;
-  font-weight: 700;
   color: #dcddde;
+
+  span {
+    font-weight: 700 !important;
+  }
 `;
 
 const FieldValue = styled.span`
@@ -133,9 +153,7 @@ const Image = styled.img`
   height: auto;
 `;
 
-const Timestamp = styled.p`
-  margin: 4px 0 0 0;
-
+const Timestamp = styled.span`
   font-size: 0.75rem;
 `;
 
