@@ -160,10 +160,11 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
   return (
     <Container ref={containerRef} color={getColor(name).bottom}>
       {!isEnd && (
-        <SkeletonContainer ref={skeletonRef}>
+        <SkeletonContainer>
           <InnerContainer>
             <Skeleton />
           </InnerContainer>
+          <div ref={skeletonRef} />
         </SkeletonContainer>
       )}
 
