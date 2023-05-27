@@ -159,19 +159,17 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
 
   return (
     <Container ref={containerRef} color={getColor(name).bottom}>
-      {!isEnd && (
+      {isEnd ? (
+        <EndMessage>
+          <span>기록된 모든 채팅을 읽으셨군요!</span>
+        </EndMessage>
+      ) : (
         <SkeletonContainer>
           <InnerContainer>
             <Skeleton />
           </InnerContainer>
           <div ref={skeletonRef} />
         </SkeletonContainer>
-      )}
-
-      {isEnd && (
-        <EndMessage>
-          <span>기록된 모든 채팅을 읽으셨군요!</span>
-        </EndMessage>
       )}
 
       <InnerContainer>
