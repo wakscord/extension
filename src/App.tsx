@@ -32,12 +32,24 @@ const App: FC = () => {
       await initializeChannelState(channelIdForDevelopment);
     }
 
-    async function initializeChannelState(channelId: string) {
-      const response = await fetch(
-        `https://api.wakscord.xyz/extension/${channelId}`
-      );
+    async function fetchChannelState(channelId: string): Promise<any | null> {
+      try {
+        const response = await fetch(
+          `https://api.wakscord.xyz/extension/${channelId}`
+        );
 
-      if (!response.ok) {
+        if (response.ok) {
+          return response.json();
+        }
+      } catch {}
+
+      return null;
+    }
+
+    async function initializeChannelState(channelId: string) {
+      const response = await fetchChannelState(channelId);
+
+      if (response === null) {
         setIsLoadSucceed(false);
 
         return;
@@ -45,7 +57,7 @@ const App: FC = () => {
 
       setIsLoadSucceed(true);
 
-      const data = (await response.json()) as Omit<Channel, "twitchId">;
+      const data = (await response) as Omit<Channel, "twitchId">;
 
       setChannel({
         twitchId: channelId,
