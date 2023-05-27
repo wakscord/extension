@@ -1,10 +1,11 @@
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { useRecoilState } from "recoil";
 import { ReactComponent as SettingsIconSVG } from "./assets/settings.svg";
 import Chats from "./components/Chats";
 import Default from "./components/Default";
+import Error from "./components/Error";
 import Info from "./components/Info";
 
 import Settings from "./components/Settings";
@@ -14,8 +15,13 @@ import { settingsState } from "./states/settings";
 const App: FC = () => {
   const [channel, setChannel] = useRecoilState(channelState);
   const [settings, setSettings] = useRecoilState(settingsState);
+  const [isLoadSucceed, setIsLoadSucceed] = useState(true);
 
   useEffect(() => {
+    loadChannelState();
+  }, []);
+
+  async function loadChannelState() {
     if (import.meta.env.PROD) {
       Twitch.ext.onAuthorized(({ channelId }) => {
         initializeChannelState(channelId);
@@ -23,13 +29,21 @@ const App: FC = () => {
     } else {
       const channelIdForDevelopment =
         import.meta.env.VITE_CHANNEL_ID ?? "195641865";
-      initializeChannelState(channelIdForDevelopment);
+      await initializeChannelState(channelIdForDevelopment);
     }
 
     async function initializeChannelState(channelId: string) {
       const response = await fetch(
         `https://api.wakscord.xyz/extension/${channelId}`
       );
+
+      if (!response.ok) {
+        setIsLoadSucceed(false);
+
+        return;
+      }
+
+      setIsLoadSucceed(true);
 
       const data = (await response.json()) as Omit<Channel, "twitchId">;
 
@@ -38,7 +52,11 @@ const App: FC = () => {
         ...data,
       });
     }
-  }, []);
+  }
+
+  if (!isLoadSucceed) {
+    return <Error onRefresh={loadChannelState} />;
+  }
 
   if (!channel || !channel.id) {
     return <Default />;
