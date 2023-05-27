@@ -53,6 +53,8 @@ const Embed: FC<EmbedProp> = ({ embed }) => {
         />
       )}
 
+      <div />
+
       {embed.footer && <Timestamp>{embed.footer.text}</Timestamp>}
       {embed.timestamp && embed.footer && <span> • </span>}
       {embed.timestamp && (
