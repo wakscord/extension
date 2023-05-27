@@ -1,16 +1,16 @@
-import { FC, useEffect, useState } from 'react';
-import styled from 'styled-components';
+import { FC, useEffect, useState } from "react";
+import styled from "styled-components";
 
-import { useRecoilState } from 'recoil';
-import { ReactComponent as SettingsIconSVG } from './assets/settings.svg';
-import Chats from './components/Chats';
-import Default from './components/Default';
-import Error from './components/Error';
-import Info from './components/Info';
+import { useRecoilState } from "recoil";
+import { ReactComponent as SettingsIconSVG } from "./assets/settings.svg";
+import Chats from "./components/Chats";
+import Default from "./components/Default";
+import Error from "./components/Error";
+import Info from "./components/Info";
 
-import Settings from './components/Settings';
-import { Channel, channelState } from './states/channel';
-import { settingsState } from './states/settings';
+import Settings from "./components/Settings";
+import { Channel, channelState } from "./states/channel";
+import { settingsState } from "./states/settings";
 
 const App: FC = () => {
   const [channel, setChannel] = useRecoilState(channelState);
@@ -28,7 +28,7 @@ const App: FC = () => {
       });
     } else {
       const channelIdForDevelopment =
-        import.meta.env.VITE_CHANNEL_ID ?? '195641865';
+        import.meta.env.VITE_CHANNEL_ID ?? "195641865";
       await initializeChannelState(channelIdForDevelopment);
     }
 
