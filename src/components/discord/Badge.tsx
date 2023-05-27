@@ -19,7 +19,8 @@ const Container = styled.span`
   padding: 0 0.25rem;
   border-radius: 0.1875rem;
 
-  vertical-align: middle;
+  box-sizing: border-box;
+  margin-bottom: 0.1rem;
 
   background-color: #5865f2;
 `;
