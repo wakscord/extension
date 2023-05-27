@@ -1,17 +1,17 @@
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import styled from "styled-components";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import styled from 'styled-components';
 
-import { useInView } from "react-intersection-observer";
-import { getColor } from "../colors";
-import Message from "./discord/Message";
-import Spinner from "./discord/Spinner";
+import { useInView } from 'react-intersection-observer';
+import { getColor } from '../colors';
+import Message from './discord/Message';
+import Skeleton from './discord/Skeleton';
 
-import { useRecoilValue } from "recoil";
-import { streamers } from "../constants";
-import { Chat, Wakzoo } from "../interfaces";
-import { settingsState } from "../states/settings";
-import { mergeFlag } from "../utils";
-import Refresh from "./Refresh";
+import { useRecoilValue } from 'recoil';
+import { streamers } from '../constants';
+import { Chat, Wakzoo } from '../interfaces';
+import { settingsState } from '../states/settings';
+import { mergeFlag } from '../utils';
+import Refresh from './Refresh';
 
 interface ChatsProps {
   id: string;
@@ -37,7 +37,7 @@ const sortChats = (prev: (Chat | Wakzoo)[], next: (Chat | Wakzoo)[]) => {
 const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { ref: spinnerRef, inView } = useInView({
+  const { ref: skeletonRef, inView } = useInView({
     threshold: 0,
   });
 
@@ -67,7 +67,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
       (async () => {
         const response = await fetch(
           `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?before=${
-            before ? before : ""
+            before ? before : ''
           }&authors=${authors}&noWakzoo=${!settings.wakzoos[name]}&notify=${
             settings.notify
           }`
@@ -161,9 +161,11 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
   return (
     <Container ref={containerRef} color={getColor(name).bottom}>
       {isFirstLoaded && !isEnd && (
-        <SpinnerContainer ref={spinnerRef}>
-          <Spinner />
-        </SpinnerContainer>
+        <SkeletonContainer ref={skeletonRef}>
+          <InnerContainer>
+            <Skeleton />
+          </InnerContainer>
+        </SkeletonContainer>
       )}
 
       {isEnd && (
@@ -230,13 +232,8 @@ const InnerContainer = styled.div`
   padding-bottom: 10px;
 `;
 
-const SpinnerContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  margin-top: 100px;
-  height: 100px;
+const SkeletonContainer = styled.div`
+  height: 1044px;
 `;
 
 const EndMessage = styled.div`
