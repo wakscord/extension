@@ -169,7 +169,7 @@ const CloseIcon = styled(CloseIconSVG)`
 `;
 
 const InnerContainer = styled.div`
-  padding: 10px 20px;
+  padding: 0px 20px;
 
   display: flex;
   flex-direction: column;
@@ -207,6 +207,10 @@ const InnerContainer = styled.div`
   &::-webkit-scrollbar-track {
     background-clip: padding-box;
     border-radius: 8px;
+  }
+
+  & > *:first-child {
+    margin-top: 10px;
   }
 
   & > *:last-child {
