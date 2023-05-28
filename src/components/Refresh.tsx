@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { ReactComponent as RefreshIconSVG } from "../assets/refresh.svg";
 import { motion, useSpring } from "framer-motion";
 
-const REFRESH_COOLDOWN = 2000;
+const REFRESH_COOLDOWN = 800;
 
 const Rotating = ({ rotate }: { rotate: boolean }) => {
   const rotation = useSpring(0, {
