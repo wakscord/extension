@@ -1,5 +1,3 @@
-import { atom } from "recoil";
-
 export interface Channel {
   id: string;
   twitchId: string;
@@ -11,7 +9,4 @@ export interface Channel {
   };
 }
 
-export const channelState = atom<Channel | null>({
-  key: "channelState",
-  default: null,
-});
+export type ChannelState = Omit<Channel, "twitchId">;

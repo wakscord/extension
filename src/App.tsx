@@ -1,72 +1,25 @@
-import { FC, useEffect, useState } from "react";
-import styled from "styled-components";
+import { FC } from 'react';
+import styled from 'styled-components';
 
-import { useRecoilState } from "recoil";
-import { ReactComponent as SettingsIconSVG } from "./assets/settings.svg";
-import Chats from "./components/Chats";
-import Default from "./components/Default";
-import Error from "./components/Error";
-import Info from "./components/Info";
+import { useRecoilState } from 'recoil';
+import { ReactComponent as SettingsIconSVG } from './assets/settings.svg';
+import Chats from './components/Chats';
+import Default from './components/Default';
+import Error from './components/Error';
+import Info from './components/Info';
 
-import Settings from "./components/Settings";
-import { Channel, channelState } from "./states/channel";
-import { settingsState } from "./states/settings";
+import Settings from './components/Settings';
+import { settingsState } from './states/settings';
+import { useChannelState } from './hooks/ChannelStates';
+import { useChannelId } from './hooks/ChannelId';
 
 const App: FC = () => {
-  const [channel, setChannel] = useRecoilState(channelState);
+  const channelId = useChannelId();
+  const { channel, error, refresh } = useChannelState(channelId);
   const [settings, setSettings] = useRecoilState(settingsState);
-  const [isLoadSucceed, setIsLoadSucceed] = useState(true);
 
-  useEffect(() => {
-    loadChannelState();
-  }, []);
-
-  async function loadChannelState() {
-    if (import.meta.env.PROD) {
-      Twitch.ext.onAuthorized(({ channelId }) => {
-        initializeChannelState(channelId);
-      });
-    } else {
-      const channelIdForDevelopment =
-        import.meta.env.VITE_CHANNEL_ID ?? "195641865";
-      await initializeChannelState(channelIdForDevelopment);
-    }
-
-    async function fetchChannelState(channelId: string): Promise<any | null> {
-      try {
-        const response = await fetch(
-          `https://api.wakscord.xyz/extension/${channelId}`
-        );
-
-        if (response.ok) {
-          return response.json();
-        }
-      } catch {}
-
-      return null;
-    }
-
-    async function initializeChannelState(channelId: string) {
-      const response = await fetchChannelState(channelId);
-
-      if (response === null) {
-        setIsLoadSucceed(false);
-
-        return;
-      }
-
-      setIsLoadSucceed(true);
-      const data = (await response) as Omit<Channel, "twitchId">;
-
-      setChannel({
-        twitchId: channelId,
-        ...data,
-      });
-    }
-  }
-
-  if (!isLoadSucceed) {
-    return <Error onRefresh={loadChannelState} />;
+  if (error) {
+    return <Error onRefresh={refresh} />;
   }
 
   if (!channel || !channel.id) {
