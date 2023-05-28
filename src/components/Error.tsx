@@ -16,11 +16,7 @@ const Error: FC<ErrorProps> = ({ onRefresh: onRefreshCallback }) => {
       <ErrorText>정보를 불러오던 중 오류가 발생했습니다.</ErrorText>
 
       <RefreshContainer>
-        <Refresh
-          onClick={async () => {
-            await onRefreshCallback();
-          }}
-        />
+        <Refresh onClick={onRefreshCallback} />
       </RefreshContainer>
     </Container>
   );
@@ -42,8 +38,9 @@ const Container = styled.div`
 const ErrorTitle = styled.h2`
   color: #1a1b1e;
 
-  margin-top: 30px;
-  margin-bottom: 15px;
+  margin-top: 1em;
+  margin-bottom: 0.25em;
+  line-height: 1.5em;
 `;
 
 const ErrorText = styled.span`
@@ -55,7 +52,7 @@ const RefreshContainer = styled.div`
   justify-content: center;
   align-items: center;
 
-  margin-top: 50px;
+  margin-top: 2em;
 `;
 
 export default Error;
