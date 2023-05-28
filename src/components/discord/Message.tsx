@@ -44,11 +44,13 @@ const Message: FC<MessageProp> = ({ id, chat, before }) => {
           />
 
           <Header>
-            <Username>{chat.author}</Username>
+            <Title>
+              <Username>{chat.author}</Username>
 
-            {!Object.keys(streamers).includes(chat.author) && (
-              <Badge>알림</Badge>
-            )}
+              {!Object.keys(streamers).includes(chat.author) && (
+                <Badge>알림</Badge>
+              )}
+            </Title>
 
             <Info>
               <time dateTime={chat.time}>
@@ -135,9 +137,20 @@ const Header = styled.div`
 
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+`;
+
+const Title = styled.div`
+  margin-right: 0.25rem;
+
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
 `;
 
 const Username = styled.span`
+  margin-right: 0.25rem;
+
   color: white;
   font-weight: 500;
 `;
@@ -145,7 +158,6 @@ const Username = styled.span`
 const Info = styled.span`
   color: #a3a6aa;
   font-size: 0.8rem;
-  margin-left: 0.5rem;
 `;
 
 const ContentContainer = styled.div`
