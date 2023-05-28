@@ -10,7 +10,7 @@ const Badge: FC<BadgeProps> = ({ children }) => {
 };
 
 const Container = styled.span`
-  margin-left: 0.25rem;
+  margin-right: 0.25rem;
 
   font-size: 0.7rem;
 
