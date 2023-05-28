@@ -18,16 +18,16 @@ interface MessageProp {
 
 const Message: FC<MessageProp> = ({ id, chat, before }) => {
   const isCompact = before
-    ? (new Date(chat.time).getTime() - new Date(before.time).getTime() <
-      5 * 60 * 1000
-        ? true
-        : false) && chat.author === before.author
+    ? new Date(chat.time).getTime() - new Date(before.time).getTime() <
+        5 * 60 * 1000 && chat.author === before.author
     : false;
 
   return (
     <Container isCompact={isCompact}>
       {isCompact ? (
-        <HoverInfo>{moment(chat.time).format("a h:mm")}</HoverInfo>
+        <HoverInfo>
+          <time dateTime={chat.time}>{moment(chat.time).format("a h:mm")}</time>
+        </HoverInfo>
       ) : (
         <>
           <Avatar
@@ -53,10 +53,12 @@ const Message: FC<MessageProp> = ({ id, chat, before }) => {
             </Title>
 
             <Info>
-              {new Date().getTime() - new Date(chat.time).getTime() >
-              24 * 60 * 60 * 1000
-                ? moment(chat.time).format("yyyy.MM.DD. a h:mm")
-                : moment(chat.time).calendar()}{" "}
+              <time dateTime={chat.time}>
+                {new Date().getTime() - new Date(chat.time).getTime() >
+                24 * 60 * 60 * 1000
+                  ? moment(chat.time).format("yyyy.MM.DD. a h:mm")
+                  : moment(chat.time).calendar()}{" "}
+              </time>
             </Info>
           </Header>
         </>
