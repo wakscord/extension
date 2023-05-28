@@ -31,18 +31,14 @@ const Settings: FC<SettingsProps> = ({ channel }) => {
       localStorage.setItem("authors", JSON.stringify(data.authors));
     }
 
-    const subscription = watch(() => handleSubmit(onSubmit)());
+    const subscription = watch(() => void handleSubmit(onSubmit)());
     return () => subscription.unsubscribe();
-  }, [handleSubmit, watch]);
+  }, [handleSubmit, watch, setSettings]);
 
   return (
     <Container isOpen={isOpen}>
       <CloseButtonContainer>
-        <CloseIcon
-          width={20}
-          height={20}
-          onClick={() => setIsOpen(false)}
-        />
+        <CloseIcon width={20} height={20} onClick={() => setIsOpen(false)} />
       </CloseButtonContainer>
       <InnerContainer>
         <Title>설정</Title>
