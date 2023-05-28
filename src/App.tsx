@@ -1,22 +1,19 @@
 import { FC } from 'react';
 import styled from 'styled-components';
 
-import { useRecoilState } from 'recoil';
-import { ReactComponent as SettingsIconSVG } from './assets/settings.svg';
 import Chats from './components/Chats';
 import Default from './components/Default';
 import Error from './components/Error';
 import Info from './components/Info';
 
 import Settings from './components/Settings';
-import { settingsState } from './states/settings';
 import { useChannelState } from './hooks/ChannelStates';
 import { useChannelId } from './hooks/ChannelId';
+import { SettingsIcon } from './components/SettingsIcon';
 
 const App: FC = () => {
   const channelId = useChannelId();
   const { channel, error, refresh } = useChannelState(channelId);
-  const [settings, setSettings] = useRecoilState(settingsState);
 
   if (error) {
     return <Error onRefresh={refresh} />;
@@ -32,16 +29,7 @@ const App: FC = () => {
 
       <Container>
         <SettingButtonContainer>
-          <SettingsIcon
-            width={20}
-            height={20}
-            onClick={() => {
-              setSettings({
-                ...settings,
-                isOpen: true,
-              });
-            }}
-          />
+          <SettingsIcon />
         </SettingButtonContainer>
 
         <ChatsConainer>
@@ -65,10 +53,6 @@ const SettingButtonContainer = styled.div`
   padding: 5px;
   box-sizing: border-box;
   height: 30px;
-`;
-
-const SettingsIcon = styled(SettingsIconSVG)`
-  cursor: pointer;
 `;
 
 const Container = styled.div`
