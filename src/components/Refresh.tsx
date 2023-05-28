@@ -38,12 +38,23 @@ const RefreshButton = styled.div`
   padding: 8px 16px;
 
   box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 3px 1px;
+  transform: scale(1);
+
+  transition: background-color 200ms cubic-bezier(0.19, 1, 0.22, 1), transform 200ms cubic-bezier(0.19, 1, 0.22, 1);
 
   display: flex;
   justify-content: center;
   align-items: center;
 
   cursor: pointer;
+
+  &:hover {
+    background-color: #50545b;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
 `;
 
 const RefreshIcon = styled(RefreshIconSVG)`
