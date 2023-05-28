@@ -10,7 +10,7 @@ interface ErrorProps {
 const Error: FC<ErrorProps> = ({ onRefresh: onRefreshCallback }) => {
   return (
     <Container>
-      <WarningSign width={110} fill="#6db69e" />
+      <WarningSign width={75} fill="#6db69e" />
 
       <ErrorTitle>오류 발생</ErrorTitle>
       <ErrorText>정보를 불러오던 중 오류가 발생했습니다.</ErrorText>
@@ -26,7 +26,7 @@ const Container = styled.div`
   width: 100%;
   height: 100%;
 
-  background-color: #ededed;
+  background-color: #313338;
 
   display: flex;
   flex-direction: column;
@@ -36,7 +36,7 @@ const Container = styled.div`
 `;
 
 const ErrorTitle = styled.h2`
-  color: #1a1b1e;
+  color: white;
 
   margin-top: 1em;
   margin-bottom: 0.25em;
@@ -44,7 +44,8 @@ const ErrorTitle = styled.h2`
 `;
 
 const ErrorText = styled.span`
-  color: #1a1b1e;
+  color: white;
+  opacity: 0.5;
 `;
 
 const RefreshContainer = styled.div`
