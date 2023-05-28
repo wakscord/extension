@@ -1,13 +1,17 @@
+import { FC } from "react";
+
 import styled from "styled-components";
 import skeletons from "../../assets/skeletons.svg";
 
-export default function Spinner() {
+interface SkeletonProps {}
+
+const Skeleton: FC<SkeletonProps> = () => {
   return (
     <Inner>
       <SkeletonImage src={skeletons} />
     </Inner>
   );
-}
+};
 
 const Inner = styled.div`
   position: relative;
@@ -25,3 +29,5 @@ const SkeletonImage = styled.img`
   -moz-user-drag: none;
   -o-user-drag: none;
 `;
+
+export default Skeleton;
