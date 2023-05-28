@@ -129,6 +129,7 @@ const Container = styled.div<{ isOpen: boolean }>`
 
   visibility: ${(props) => (props.isOpen ? "visible" : "hidden")};
   transition: visibility 0.2s ease-in-out;
+  pointer-events: ${(props) => (props.isOpen ? "auto" : "none")};
 
   animation: ${(props) => (props.isOpen ? fadeinAnimation : fadeoutAnimation)}
     0.2s ease-in-out;
