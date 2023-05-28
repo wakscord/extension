@@ -197,8 +197,8 @@ const Container = styled.div<{ color: string }>`
   padding-right: 10px;
 
   &::-webkit-scrollbar {
-    width: 16px;
-    height: 16px;
+    width: 7px;
+    height: 7px;
   }
 
   &::-webkit-scrollbar-corner {
@@ -211,12 +211,15 @@ const Container = styled.div<{ color: string }>`
   }
 
   &::-webkit-scrollbar-track {
-    background: #2b2d31;
+    background: transparent;
+
+    &:hover {
+      background: #2b2d31;
+    }
   }
 
   &::-webkit-scrollbar-thumb,
   &::-webkit-scrollbar-track {
-    border: 4px solid transparent;
     background-clip: padding-box;
     border-radius: 8px;
   }
