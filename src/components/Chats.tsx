@@ -195,6 +195,8 @@ const Container = styled.div<{ color: string }>`
   overflow-y: scroll;
 
   padding-right: 10px;
+  margin-right: 2px;
+  margin: 2px 3px 2px 0px;
 
   &::-webkit-scrollbar {
     width: 7px;

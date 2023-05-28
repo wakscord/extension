@@ -177,8 +177,10 @@ const InnerContainer = styled.div`
 
   user-select: none;
 
-  height: 100%;
+  height: calc(100% - 4px);
   overflow-y: scroll;
+  margin-right: 2px;
+  margin: 2px 3px 2px 0px;
 
   &::-webkit-scrollbar {
     width: 7px;

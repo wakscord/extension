@@ -35,6 +35,7 @@ const Info: FC<InfoProps> = ({ channel }) => {
 const Container = styled.div<{ color: string }>`
   height: 74px;
   padding: 15px 18px;
+  z-index: 10;
 
   display: flex;
   align-items: center;
