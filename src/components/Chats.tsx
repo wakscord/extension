@@ -8,31 +8,16 @@ import Skeleton from "./discord/Skeleton";
 
 import { useRecoilValue } from "recoil";
 import { streamers } from "../constants";
-import { Chat, Wakzoo } from "../interfaces";
 import { settingsState } from "../states/settings";
 import { mergeFlag } from "../utils";
 import Refresh from "./Refresh";
+import useExtensionChats from "../hooks/useExtensionChats";
 
 interface ChatsProps {
   id: string;
   twitchId: string;
   name: string;
 }
-
-const sortChats = (prev: (Chat | Wakzoo)[], next: (Chat | Wakzoo)[]) => {
-  return [
-    ...next.filter(
-      (chat: Chat | Wakzoo) => !prev.find((prevChat) => prevChat.id === chat.id)
-    ),
-    ...prev,
-  ].sort((a: Chat | Wakzoo, b: Chat | Wakzoo) =>
-    new Date(a.time) > new Date(b.time)
-      ? 1
-      : new Date(a.time) < new Date(b.time)
-      ? -1
-      : 0
-  );
-};
 
 const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -41,7 +26,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
     threshold: 0,
   });
 
-  const [chats, setChats] = useState<(Chat | Wakzoo)[]>([]);
+  // const [chats, setChats] = useState<(Chat | Wakzoo)[]>([]);
 
   const [last, setLast] = useState<number | null>(null);
   const [before, setBefore] = useState<number | null>(null);
@@ -61,90 +46,55 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
     return mergeFlag(flags);
   }, [settings.authors, name]);
 
+  const { chats, setChats, query } = useExtensionChats({
+    twitchId,
+    before,
+    authors,
+    noWakzoo: !settings.wakzoos[name],
+    noNotify: !settings.notify,
+  });
+
   useEffect(() => {
-    if (inView) {
-      void (async () => {
-        const response = await fetch(
-          `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?before=${
-            before ? before : ""
-          }&authors=${authors}&noWakzoo=${!settings.wakzoos[
-            name
-          ]}&noNotify=${!settings.notify}`
-        );
-
-        const data = (await response.json()) as (Chat | Wakzoo)[];
-
-        if (!data.length) {
-          setIsEnd(true);
-          return;
-        }
-
-        setBefore(data[0].id);
-        setChats((prev) => sortChats(prev, data));
-
-        if (containerRef.current) {
-          setOldHeight(containerRef.current.scrollHeight);
-          setOldScroll(containerRef.current.scrollTop);
-        }
-      })();
+    if (query.isLoading) {
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inView]);
 
-  const loadRecent = useCallback(
+    if (query.data && query.data.length && inView) {
+      setBefore(query.data[0].id);
+    }
+    if (query.data && !query.data.length) {
+      setIsEnd(true);
+    }
+    if (containerRef.current) {
+      setOldHeight(containerRef.current.scrollHeight);
+      setOldScroll(containerRef.current.scrollTop);
+    }
+  }, [containerRef, inView, query.data, query.isLoading]);
+
+  const loadRecentChats = useCallback(
     async (manual = false) => {
-      if (!manual && !settings.autoRefresh) return;
-
-      const response = await fetch(
-        `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?authors=${authors}&noWakzoo=${!settings
-          .wakzoos[name]}&noNotify=${!settings.notify}`
-      );
-
-      const data = (await response.json()) as (Chat | Wakzoo)[];
-
-      setChats((prev) => sortChats(prev, data));
-    },
-    [
-      settings.autoRefresh,
-      authors,
-      name,
-      settings.notify,
-      settings.wakzoos,
-      twitchId,
-    ]
-  );
-
-  useEffect(() => {
-    const intervalId = setInterval(loadRecent, 10000);
-
-    return () => clearInterval(intervalId);
-  }, [loadRecent]);
-
-  useEffect(() => {
-    void (async () => {
-      const response = await fetch(
-        `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?authors=${authors}&noWakzoo=${!settings
-          .wakzoos[name]}&noNotify=${!settings.notify}`
-      );
-
-      const data = (await response.json()) as (Chat | Wakzoo)[];
-
-      setIsEnd(false);
-
-      if (data.length === 0) {
-        setBefore(null);
-        setChats([]);
+      if (!manual && !settings.autoRefresh) {
         return;
       }
 
-      setBefore(data[0].id);
-      setChats(data);
+      setBefore(null);
+      await query.refetch();
+    },
+    [settings.autoRefresh, query]
+  );
 
-      if (containerRef.current) {
-        setOldHeight(containerRef.current.scrollHeight);
-        setOldScroll(containerRef.current.scrollTop);
-      }
-    })();
+  useEffect(() => {
+    const intervalId = setInterval(loadRecentChats, 1_000);
+    return () => clearInterval(intervalId);
+  }, [loadRecentChats]);
+
+  useEffect(() => {
+    setIsEnd(false);
+  }, []);
+
+  useEffect(() => {
+    setChats([]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authors, settings.wakzoos, name, settings.notify, twitchId]);
 
   useEffect(() => {
@@ -155,7 +105,9 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
   }, [oldHeight, oldScroll]);
 
   useEffect(() => {
-    if (!chats.length) return;
+    if (!chats.length || query.isLoading) {
+      return;
+    }
 
     if (chats[chats.length - 1].id !== last && containerRef.current) {
       setOldHeight(containerRef.current.scrollHeight);
@@ -163,7 +115,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
     }
 
     setLast(chats[chats.length - 1].id);
-  }, [chats, last]);
+  }, [chats, last, query.isLoading]);
 
   return (
     <Container ref={containerRef} color={getColor(name).bottom}>
@@ -186,11 +138,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
         ))}
 
         <RefreshContainer>
-          <Refresh
-            onClick={async () => {
-              await loadRecent(true);
-            }}
-          />
+          <Refresh onClick={() => loadRecentChats(true)} />
         </RefreshContainer>
       </InnerContainer>
     </Container>
