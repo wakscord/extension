@@ -122,11 +122,11 @@ const Container = styled.div<{ isOpen: boolean }>`
   background-color: #313338;
 
   visibility: ${(props) => (props.isOpen ? "visible" : "hidden")};
-  transition: visibility 0.2s ease-in-out;
+  transition: visibility 0.2s cubic-bezier(0.19, 1, 0.22, 1);
   pointer-events: ${(props) => (props.isOpen ? "auto" : "none")};
 
   animation: ${(props) => (props.isOpen ? fadeinAnimation : fadeoutAnimation)}
-    0.2s ease-in-out;
+    0.4s cubic-bezier(0.19, 1, 0.22, 1);
 `;
 
 const fadeinAnimation = keyframes`
@@ -154,12 +154,14 @@ const fadeoutAnimation = keyframes`
 `;
 
 const CloseButtonContainer = styled.div`
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+
   display: flex;
   justify-content: flex-end;
-
-  padding: 5px;
   box-sizing: border-box;
-  height: 30px;
 `;
 
 const CloseIcon = styled(CloseIconSVG)`
@@ -167,7 +169,7 @@ const CloseIcon = styled(CloseIconSVG)`
 `;
 
 const InnerContainer = styled.div`
-  padding: 10px 40px 10px;
+  padding: 10px 20px;
 
   display: flex;
   flex-direction: column;
@@ -175,7 +177,7 @@ const InnerContainer = styled.div`
 
   user-select: none;
 
-  height: calc(100% - 60px);
+  height: 100%;
   overflow-y: scroll;
 
   &::-webkit-scrollbar {
@@ -202,11 +204,15 @@ const InnerContainer = styled.div`
     background-clip: padding-box;
     border-radius: 8px;
   }
+
+  & > *:last-child {
+    margin-bottom: 10vh;
+  }
 `;
 
 const Title = styled.h1`
   font-size: 20px;
-  line-height: 24px;
+  line-height: 40px;
   font-weight: bold;
   margin: 0;
 `;

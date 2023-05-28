@@ -48,12 +48,14 @@ const App: FC = () => {
 };
 
 const SettingButtonContainer = styled.div`
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+
   display: flex;
   justify-content: flex-end;
-
-  padding: 5px;
   box-sizing: border-box;
-  height: 30px;
 `;
 
 const Container = styled.div`
@@ -64,10 +66,9 @@ const Container = styled.div`
 `;
 
 const ChatsConainer = styled.div`
-  height: calc(100vh - 104px);
+  height: calc(100vh - 74px);
 
   box-sizing: border-box;
-  padding-bottom: 10px;
 `;
 
 export default App;
