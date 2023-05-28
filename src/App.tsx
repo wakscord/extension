@@ -19,7 +19,7 @@ const App: FC = () => {
     return <Error onRefresh={refresh} />;
   }
 
-  if (!channel || !channel.id) {
+  if (!channel) {
     return <Default />;
   }
 
