@@ -4,7 +4,7 @@ import skeletons from "../../assets/skeletons.svg";
 export default function Spinner() {
   return (
     <Inner>
-      <img src={skeletons} />
+      <SkeletonImage src={skeletons} />
     </Inner>
   );
 }
@@ -15,4 +15,13 @@ const Inner = styled.div`
   height: 1039px;
   left: 10px;
   contain: paint;
+`;
+
+const SkeletonImage = styled.img`
+  user-select: none;
+
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
 `;
