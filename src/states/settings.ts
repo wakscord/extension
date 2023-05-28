@@ -2,7 +2,6 @@ import { atom } from "recoil";
 import { streamerNames } from "../constants";
 
 export interface Settings {
-  isOpen: boolean;
   autoRefresh: boolean;
   wakzoos: Wakzoos;
   notify: boolean;
@@ -34,10 +33,14 @@ const initialWakzoosValue = Object.fromEntries(
 export const settingsState = atom<Settings>({
   key: "settingsState",
   default: {
-    isOpen: false,
     autoRefresh: localStorage.getItem("autoRefresh") === "true",
     wakzoos: wakzoos ? (JSON.parse(wakzoos) as Wakzoos) : initialWakzoosValue,
     notify: notify ? notify === "true" : true,
     authors: authors ? (JSON.parse(authors) as Authors) : initialAuthorsValue,
   },
+});
+
+export const settingsOpenState = atom<boolean>({
+  key: "settingsOpenState",
+  default: false,
 });

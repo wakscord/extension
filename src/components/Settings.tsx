@@ -6,7 +6,7 @@ import { Controller, useForm } from "react-hook-form";
 import { ReactComponent as CloseIconSVG } from "../assets/close.svg";
 import { streamerNames } from "../constants";
 import { Channel } from "../states/channel";
-import { Settings, settingsState } from "../states/settings";
+import { Settings, settingsOpenState, settingsState } from "../states/settings";
 import Slider from "./discord/Slider";
 
 interface SettingsProps {
@@ -15,8 +15,8 @@ interface SettingsProps {
 type FormFields = Omit<Settings, "isOpen">;
 
 const Settings: FC<SettingsProps> = ({ channel }) => {
-  const [{ isOpen, ...defaultValues }, setSettings] =
-    useRecoilState(settingsState);
+  const [isOpen, setIsOpen] = useRecoilState(settingsOpenState);
+  const [defaultValues, setSettings] = useRecoilState(settingsState);
 
   const { control, watch, handleSubmit } = useForm<FormFields>({
     defaultValues,
@@ -42,12 +42,7 @@ const Settings: FC<SettingsProps> = ({ channel }) => {
         <CloseIcon
           width={20}
           height={20}
-          onClick={() => {
-            setSettings((settings) => ({
-              ...settings,
-              isOpen: false,
-            }));
-          }}
+          onClick={() => setIsOpen(false)}
         />
       </CloseButtonContainer>
       <InnerContainer>
