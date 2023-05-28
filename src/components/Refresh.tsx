@@ -47,7 +47,7 @@ const Rotating = ({ rotate }: { rotate: boolean }) => {
 };
 
 interface RefreshProps {
-  onClick: () => Promise<void> | void;
+  onClick: () => Promise<void>;
 }
 
 const Refresh: FC<RefreshProps> = ({ onClick: onClickCallback }) => {

@@ -138,7 +138,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
         ))}
 
         <RefreshContainer>
-          <Refresh onClick={() => loadRecentChats(true)} />
+          <Refresh onClick={async () => await loadRecentChats(true)} />
         </RefreshContainer>
       </InnerContainer>
     </Container>
