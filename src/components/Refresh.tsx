@@ -101,7 +101,8 @@ const RefreshButton = styled.div<{ disabled: boolean }>`
   align-items: center;
 
   ${({ disabled }) =>
-  disabled && `
+    disabled &&
+    `
     pointer-events: none;
     opacity: 0.5;
   `};

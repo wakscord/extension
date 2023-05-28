@@ -38,11 +38,7 @@ const Settings: FC<SettingsProps> = ({ channel }) => {
   return (
     <Container isOpen={isOpen}>
       <CloseButtonContainer>
-        <CloseIcon
-          width={20}
-          height={20}
-          onClick={() => setIsOpen(false)}
-        />
+        <CloseIcon width={20} height={20} onClick={() => setIsOpen(false)} />
       </CloseButtonContainer>
       <InnerContainer>
         <Title>설정</Title>
