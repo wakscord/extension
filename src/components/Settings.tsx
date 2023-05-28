@@ -12,18 +12,17 @@ import Slider from "./discord/Slider";
 interface SettingsProps {
   channel: Channel;
 }
-type FormFields = Omit<Settings, "isOpen">;
 
 const Settings: FC<SettingsProps> = ({ channel }) => {
   const [isOpen, setIsOpen] = useRecoilState(settingsOpenState);
   const [defaultValues, setSettings] = useRecoilState(settingsState);
 
-  const { control, watch, handleSubmit } = useForm<FormFields>({
+  const { control, watch, handleSubmit } = useForm<Settings>({
     defaultValues,
   });
 
   useEffect(() => {
-    function onSubmit(data: FormFields) {
+    function onSubmit(data: Settings) {
       setSettings((settings) => ({ ...settings, ...data }));
 
       localStorage.setItem("autoRefresh", JSON.stringify(data.autoRefresh));
