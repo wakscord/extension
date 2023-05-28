@@ -17,7 +17,9 @@ export const useChannelId = () => {
     }
 
     // 개발 환경인 경우 기본 개발 채널 ID를 사용합니다.
-    setChannelId(import.meta.env.VITE_CHANNEL_ID ?? "195641865");
+    setChannelId(
+      (import.meta.env.VITE_CHANNEL_ID as string | undefined) ?? "195641865"
+    );
   }, []);
 
   return channelId;

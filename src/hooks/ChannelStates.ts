@@ -1,38 +1,24 @@
 import { useCallback, useEffect, useState } from "react";
 import { Channel, ChannelState } from "../states/channel";
 
-function isValidChannelStateResponse(value: any): value is ChannelState {
-  if (typeof value !== "object") {
-    return false;
-  }
-
-  if (typeof value.id !== "string") {
-    return false;
-  }
-
-  if (typeof value.name !== "string") {
-    return false;
-  }
-
-  if (typeof value.info !== "undefined") {
-    if (typeof value.info !== "object") {
-      return false;
-    }
-
-    if (typeof value.info.date !== "string") {
-      return false;
-    }
-
-    if (typeof value.info.idx !== "string") {
-      return false;
-    }
-
-    if (typeof value.info.status !== "string") {
-      return false;
-    }
-  }
-
-  return true;
+function isValidChannelStateResponse(value: unknown): value is ChannelState {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "id" in value &&
+    typeof value.id === "string" &&
+    "name" in value &&
+    typeof value.name === "string" &&
+    "info" in value &&
+    typeof value.info === "object" &&
+    value.info !== null &&
+    "date" in value.info &&
+    typeof value.info.date === "string" &&
+    "idx" in value.info &&
+    typeof value.info.idx === "string" &&
+    "status" in value.info &&
+    typeof value.info.status === "string"
+  );
 }
 
 /**
@@ -83,13 +69,13 @@ export const useChannelState = (channelId: string | null) => {
           ...channelState,
         });
       })
-      .catch((e) => setError(e))
+      .catch((e: Error) => setError(e))
       .finally(() => setIsLoading(false));
   }, [channelId]);
 
   useEffect(() => {
-    load();
-  }, [channelId]);
+    void load();
+  }, [load]);
 
   return { channel, isLoading, error, refresh: load };
 };

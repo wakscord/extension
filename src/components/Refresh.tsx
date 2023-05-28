@@ -31,7 +31,7 @@ const Rotating = ({ rotate }: { rotate: boolean }) => {
 
       clearInterval(interval);
     };
-  }, [rotate]);
+  }, [rotate, rotation]);
 
   return (
     <motion.span
@@ -61,7 +61,7 @@ const Refresh: FC<RefreshProps> = ({ onClick: onClickCallback }) => {
     }
   }, [refreshing]);
 
-  const onClick = async () => {
+  const onRefresh = async () => {
     if (refreshing) {
       return;
     }
@@ -76,7 +76,12 @@ const Refresh: FC<RefreshProps> = ({ onClick: onClickCallback }) => {
   };
 
   return (
-    <RefreshButton onClick={onClick} disabled={disabled}>
+    <RefreshButton
+      onClick={() => {
+        void onRefresh();
+      }}
+      disabled={disabled}
+    >
       <Rotating rotate={refreshing} />
       <RefreshText>새로고침</RefreshText>
     </RefreshButton>

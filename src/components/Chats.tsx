@@ -59,11 +59,11 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
       .map(([key]) => streamers[key].flag);
 
     return mergeFlag(flags);
-  }, [settings.authors]);
+  }, [settings.authors, name]);
 
   useEffect(() => {
     if (inView) {
-      (async () => {
+      void (async () => {
         const response = await fetch(
           `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?before=${
             before ? before : ""
@@ -72,7 +72,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
           ]}&noNotify=${!settings.notify}`
         );
 
-        const data: (Chat | Wakzoo)[] = await response.json();
+        const data = (await response.json()) as (Chat | Wakzoo)[];
 
         if (!data.length) {
           setIsEnd(true);
@@ -88,6 +88,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
         }
       })();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inView]);
 
   const loadRecent = useCallback(
@@ -99,11 +100,18 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
           .wakzoos[name]}&noNotify=${!settings.notify}`
       );
 
-      const data = await response.json();
+      const data = (await response.json()) as (Chat | Wakzoo)[];
 
       setChats((prev) => sortChats(prev, data));
     },
-    [settings.autoRefresh]
+    [
+      settings.autoRefresh,
+      authors,
+      name,
+      settings.notify,
+      settings.wakzoos,
+      twitchId,
+    ]
   );
 
   useEffect(() => {
@@ -113,13 +121,13 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
   }, [loadRecent]);
 
   useEffect(() => {
-    (async () => {
+    void (async () => {
       const response = await fetch(
         `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?authors=${authors}&noWakzoo=${!settings
           .wakzoos[name]}&noNotify=${!settings.notify}`
       );
 
-      const data: (Chat | Wakzoo)[] = await response.json();
+      const data = (await response.json()) as (Chat | Wakzoo)[];
 
       setIsEnd(false);
 
@@ -137,7 +145,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
         setOldScroll(containerRef.current.scrollTop);
       }
     })();
-  }, [authors, settings.wakzoos[name], settings.notify]);
+  }, [authors, settings.wakzoos, name, settings.notify, twitchId]);
 
   useEffect(() => {
     if (containerRef.current) {
