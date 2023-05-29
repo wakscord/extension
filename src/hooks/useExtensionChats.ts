@@ -1,6 +1,7 @@
 import { useInfiniteQuery, QueryFunctionContext } from "@tanstack/react-query";
 import { API_ENDPOINT } from "../utils/network";
 import { Chat, Wakzoo } from "../interfaces";
+import { useMemo } from "react";
 
 export interface UseExtensionChatsRequest {
   twitchId: string;
@@ -12,6 +13,7 @@ export interface UseExtensionChatsRequest {
 export const UseExtensionChatsQuery = (request: UseExtensionChatsRequest) => ({
   queryKey: ["extension.chatsv2", request],
   queryFn: async ({ pageParam }: QueryFunctionContext) => {
+    // TODO: Remove test condition
     if (pageParam <= 26_000) {
       console.log("finished!");
       return [];
@@ -35,13 +37,17 @@ export const UseExtensionChatsQuery = (request: UseExtensionChatsRequest) => ({
 });
 
 const useExtensionChats = (request: UseExtensionChatsRequest) => {
-  return useInfiniteQuery({
-    ...UseExtensionChatsQuery(request),
-    staleTime: 10_000,
-    keepPreviousData: true,
-    getPreviousPageParam: (lastPage) =>
-      lastPage.length ? lastPage[0].id : undefined,
-  });
+  const query = useMemo(() => UseExtensionChatsQuery(request), [request]);
+
+  return {
+    queryKey: query.queryKey,
+    ...useInfiniteQuery({
+      ...query,
+      staleTime: 10_000,
+      getPreviousPageParam: (lastPage) =>
+        lastPage.length ? lastPage[0].id : undefined,
+    }),
+  };
 };
 
 export default useExtensionChats;

@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { forwardRef } from "react";
 
 import moment from "moment";
 import "moment/dist/locale/ko";
@@ -14,77 +14,82 @@ interface MessageProp {
   id: string;
   chat: Chat | Wakzoo;
   before?: Chat | Wakzoo;
+  "data-index"?: number;
 }
 
-const Message: FC<MessageProp> = ({ id, chat, before }) => {
-  const isCompact = before
-    ? new Date(chat.time).getTime() - new Date(before.time).getTime() <
-        5 * 60 * 1000 && chat.author === before.author
-    : false;
+const Message = forwardRef<HTMLDivElement, MessageProp>(
+  ({ id, chat, before, ...props }, ref) => {
+    const isCompact = before
+      ? new Date(chat.time).getTime() - new Date(before.time).getTime() <
+          5 * 60 * 1000 && chat.author === before.author
+      : false;
 
-  return (
-    <Container isCompact={isCompact}>
-      {isCompact ? (
-        <HoverInfo>
-          <time dateTime={chat.time}>{moment(chat.time).format("a h:mm")}</time>
-        </HoverInfo>
-      ) : (
-        <>
-          <Avatar
-            src={
-              Object.keys(streamers).includes(chat.author)
-                ? `https://api.wakscord.xyz/avatar/${
-                    streamers[chat.author].id
-                  }.png`
-                : `https://api.wakscord.xyz/avatar/${chat.author}`
-            }
-            onError={(event) => {
-              event.currentTarget.src = `https://api.wakscord.xyz/avatar/${id}.png`;
-            }}
+    return (
+      <Container isCompact={isCompact} {...props} ref={ref}>
+        {isCompact ? (
+          <HoverInfo>
+            <time dateTime={chat.time}>
+              {moment(chat.time).format("a h:mm")}
+            </time>
+          </HoverInfo>
+        ) : (
+          <>
+            <Avatar
+              src={
+                Object.keys(streamers).includes(chat.author)
+                  ? `https://api.wakscord.xyz/avatar/${
+                      streamers[chat.author].id
+                    }.png`
+                  : `https://api.wakscord.xyz/avatar/${chat.author}`
+              }
+              onError={(event) => {
+                event.currentTarget.src = `https://api.wakscord.xyz/avatar/${id}.png`;
+              }}
+            />
+
+            <Header>
+              <Title>
+                <Username>{chat.author}</Username>
+
+                {!Object.keys(streamers).includes(chat.author) && (
+                  <Badge>알림</Badge>
+                )}
+              </Title>
+
+              <Info>
+                <time dateTime={chat.time}>
+                  {new Date().getTime() - new Date(chat.time).getTime() >
+                  24 * 60 * 60 * 1000
+                    ? moment(chat.time).format("yyyy.MM.DD. a h:mm")
+                    : moment(chat.time).calendar()}{" "}
+                </time>
+              </Info>
+            </Header>
+          </>
+        )}
+
+        <ContentContainer>
+          <Content
+            content={chat.content}
+            emotes={Array.isArray(chat.data) ? undefined : (chat as Chat).data}
           />
 
-          <Header>
-            <Title>
-              <Username>{chat.author}</Username>
-
-              {!Object.keys(streamers).includes(chat.author) && (
-                <Badge>알림</Badge>
-              )}
-            </Title>
-
-            <Info>
-              <time dateTime={chat.time}>
-                {new Date().getTime() - new Date(chat.time).getTime() >
-                24 * 60 * 60 * 1000
-                  ? moment(chat.time).format("yyyy.MM.DD. a h:mm")
-                  : moment(chat.time).calendar()}{" "}
-              </time>
-            </Info>
-          </Header>
-        </>
-      )}
-
-      <ContentContainer>
-        <Content
-          content={chat.content}
-          emotes={Array.isArray(chat.data) ? undefined : (chat as Chat).data}
-        />
-
-        {Array.isArray(chat.data) &&
-          (chat as Wakzoo).data.map((embed, idx) => (
-            <Embed key={idx} embed={embed} />
-          ))}
-      </ContentContainer>
-    </Container>
-  );
-};
+          {Array.isArray(chat.data) &&
+            (chat as Wakzoo).data.map((embed, idx) => (
+              <Embed key={idx} embed={embed} />
+            ))}
+        </ContentContainer>
+      </Container>
+    );
+  }
+);
 
 const Container = styled.div<{ isCompact: boolean }>`
   position: relative;
+
   display: flex;
   flex-direction: column;
-  padding: 0 0 0 10px;
-  padding-left: 10px;
+  padding: 2px 0 0 10px;
 
   background: #313338;
 
@@ -166,4 +171,5 @@ const ContentContainer = styled.div`
   font-weight: 300;
 `;
 
+Message.displayName = "Message";
 export default Message;
