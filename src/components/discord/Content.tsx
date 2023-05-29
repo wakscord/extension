@@ -13,7 +13,7 @@ interface ContentProps {
 
 const Content: FC<ContentProps> = ({ content, emotes: rawEmotes }) => {
   const render: Array<ReactElement> = [];
-  const emotes: any = {};
+  const emotes: Record<string, string> = {};
 
   let bigEmote = true;
 

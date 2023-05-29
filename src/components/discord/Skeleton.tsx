@@ -1,17 +1,11 @@
-import { FC } from "react";
-
 import styled from "styled-components";
 import skeletons from "../../assets/skeletons.svg";
 
-interface SkeletonProps {}
-
-const Skeleton: FC<SkeletonProps> = () => {
-  return (
-    <Inner>
-      <SkeletonImage src={skeletons} />
-    </Inner>
-  );
-};
+const Skeleton = () => (
+  <Inner>
+    <SkeletonImage src={skeletons} />
+  </Inner>
+);
 
 const Inner = styled.div`
   position: relative;
