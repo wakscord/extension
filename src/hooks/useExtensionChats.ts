@@ -1,8 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, QueryFunctionContext } from "@tanstack/react-query";
 import { API_ENDPOINT } from "../utils/network";
 import { Chat, Wakzoo } from "../interfaces";
-import { useState } from "react";
-import { sortChats } from "../utils/chats";
 
 export interface UseExtensionChatsRequest {
   twitchId: string;
@@ -14,13 +12,16 @@ export interface UseExtensionChatsRequest {
 
 export const UseExtensionChatsQuery = (request: UseExtensionChatsRequest) => ({
   queryKey: ["extension.chatsv2", request],
-  queryFn: async () => {
+  queryFn: async ({ pageParam }: QueryFunctionContext) => {
     const queryParams = new URLSearchParams({
-      ...(request.before ? { before: request.before.toString() } : {}),
+      before: (pageParam as number).toString(),
+      // ...(request.before ? { before: request.before.toString() } : {}),
       authors: request.authors.toString(),
       noWakzoo: request.noWakzoo.toString(),
       noNotify: request.noNotify.toString(),
     }).toString();
+
+    console.log(`fetching ${queryParams}`);
 
     const response = await fetch(
       `${API_ENDPOINT}/extension/${request.twitchId}/chatsv2?${queryParams}`
@@ -31,17 +32,13 @@ export const UseExtensionChatsQuery = (request: UseExtensionChatsRequest) => ({
 });
 
 const useExtensionChats = (request: UseExtensionChatsRequest) => {
-  const [chats, setChats] = useState<(Chat | Wakzoo)[]>([]);
-
-  const query = useQuery({
+  return useInfiniteQuery({
     ...UseExtensionChatsQuery(request),
-    staleTime: 10000,
-    onSuccess: (data) => {
-      setChats((prev) => sortChats(prev, data));
-    },
+    staleTime: 10_000,
+    keepPreviousData: true,
+    getPreviousPageParam: (lastPage) =>
+      lastPage.length ? lastPage[0].id : undefined,
   });
-
-  return { chats, setChats, query };
 };
 
 export default useExtensionChats;
