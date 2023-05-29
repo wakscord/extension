@@ -1,4 +1,12 @@
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  FC,
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import styled from "styled-components";
 
 import { useInView } from "react-intersection-observer";
@@ -26,13 +34,6 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
     threshold: 0,
   });
 
-  // const [chats, setChats] = useState<(Chat | Wakzoo)[]>([]);
-
-  const [last, setLast] = useState<number | null>(null);
-  const [before, setBefore] = useState<number | null>(null);
-
-  const [isEnd, setIsEnd] = useState(false);
-
   const [oldHeight, setOldHeight] = useState(0);
   const [oldScroll, setOldScroll] = useState(0);
 
@@ -46,30 +47,26 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
     return mergeFlag(flags);
   }, [settings.authors, name]);
 
-  const { chats, setChats, query } = useExtensionChats({
-    twitchId,
-    before,
-    authors,
-    noWakzoo: !settings.wakzoos[name],
-    noNotify: !settings.notify,
-  });
+  const { data, refetch, fetchPreviousPage, hasPreviousPage } =
+    useExtensionChats({
+      twitchId,
+      authors,
+      noWakzoo: !settings.wakzoos[name],
+      noNotify: !settings.notify,
+    });
 
   useEffect(() => {
-    if (query.isLoading) {
-      return;
+    if (inView) {
+      fetchPreviousPage()
+        .then(() => {
+          if (containerRef.current) {
+            setOldHeight(containerRef.current.scrollHeight);
+            setOldScroll(containerRef.current.scrollTop);
+          }
+        })
+        .catch((error) => console.error(error));
     }
-
-    if (query.data && query.data.length && inView) {
-      setBefore(query.data[0].id);
-    }
-    if (query.data && !query.data.length) {
-      setIsEnd(true);
-    }
-    if (containerRef.current) {
-      setOldHeight(containerRef.current.scrollHeight);
-      setOldScroll(containerRef.current.scrollTop);
-    }
-  }, [containerRef, inView, query.data, query.isLoading]);
+  }, [inView, fetchPreviousPage]);
 
   const loadRecentChats = useCallback(
     async (manual = false) => {
@@ -77,10 +74,10 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
         return;
       }
 
-      setBefore(null);
-      await query.refetch();
+      const result = await refetch();
+      console.log(`refetched ${JSON.stringify(result)}`);
     },
-    [settings.autoRefresh, query]
+    [settings.autoRefresh, refetch]
   );
 
   useEffect(() => {
@@ -89,37 +86,15 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
   }, [loadRecentChats]);
 
   useEffect(() => {
-    setIsEnd(false);
-  }, []);
-
-  useEffect(() => {
-    setChats([]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authors, settings.wakzoos, name, settings.notify, twitchId]);
-
-  useEffect(() => {
     if (containerRef.current) {
       containerRef.current.scrollTop =
         containerRef.current.scrollHeight - oldHeight + oldScroll;
     }
   }, [oldHeight, oldScroll]);
 
-  useEffect(() => {
-    if (!chats.length || query.isLoading) {
-      return;
-    }
-
-    if (chats[chats.length - 1].id !== last && containerRef.current) {
-      setOldHeight(containerRef.current.scrollHeight);
-      setOldScroll(containerRef.current.scrollHeight);
-    }
-
-    setLast(chats[chats.length - 1].id);
-  }, [chats, last, query.isLoading]);
-
   return (
     <Container ref={containerRef} color={getColor(name).bottom}>
-      {isEnd ? (
+      {!hasPreviousPage ? (
         <EndMessage>
           <span>기록된 모든 채팅을 읽으셨군요!</span>
         </EndMessage>
@@ -133,10 +108,14 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
       )}
 
       <InnerContainer>
-        {chats.map((chat, index) => (
-          <Message key={index} id={id} chat={chat} before={chats[index - 1]} />
+        {data?.pages.flat().map((chat, index, chats) => (
+          <Message
+            key={chat.id}
+            id={id}
+            chat={chat}
+            before={chats[index - 1]}
+          />
         ))}
-
         <RefreshContainer>
           <Refresh onClick={async () => await loadRecentChats(true)} />
         </RefreshContainer>

@@ -4,7 +4,6 @@ import { Chat, Wakzoo } from "../interfaces";
 
 export interface UseExtensionChatsRequest {
   twitchId: string;
-  before?: number | null;
   authors: number;
   noWakzoo: boolean;
   noNotify: boolean;
@@ -14,8 +13,7 @@ export const UseExtensionChatsQuery = (request: UseExtensionChatsRequest) => ({
   queryKey: ["extension.chatsv2", request],
   queryFn: async ({ pageParam }: QueryFunctionContext) => {
     const queryParams = new URLSearchParams({
-      before: (pageParam as number).toString(),
-      // ...(request.before ? { before: request.before.toString() } : {}),
+      ...(pageParam ? { before: (pageParam as number).toString() } : {}),
       authors: request.authors.toString(),
       noWakzoo: request.noWakzoo.toString(),
       noNotify: request.noNotify.toString(),
