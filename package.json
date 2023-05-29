@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^4.29.11",
+    "@tanstack/react-virtual": "^3.0.0-alpha.0",
     "framer-motion": "^10.12.10",
     "moment": "^2.29.4",
     "normalize.css": "^8.0.1",
