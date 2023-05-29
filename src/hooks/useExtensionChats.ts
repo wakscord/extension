@@ -12,6 +12,11 @@ export interface UseExtensionChatsRequest {
 export const UseExtensionChatsQuery = (request: UseExtensionChatsRequest) => ({
   queryKey: ["extension.chatsv2", request],
   queryFn: async ({ pageParam }: QueryFunctionContext) => {
+    if (pageParam <= 26_000) {
+      console.log("finished!");
+      return [];
+    }
+
     const queryParams = new URLSearchParams({
       ...(pageParam ? { before: (pageParam as number).toString() } : {}),
       authors: request.authors.toString(),

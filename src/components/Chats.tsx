@@ -1,13 +1,6 @@
-import {
-  FC,
-  Fragment,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 import { useInView } from "react-intersection-observer";
 import { getColor } from "../colors";
@@ -55,18 +48,39 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
       noNotify: !settings.notify,
     });
 
+  const chats = data ? data.pages.flat() : [];
+
+  const virtualizer = useVirtualizer({
+    count: hasPreviousPage ? chats.length + 1 : chats.length,
+    getScrollElement: () => containerRef.current,
+    estimateSize: () => 36,
+  });
+
+  const virtualItems = virtualizer.getVirtualItems();
+
+  console.log(`chats`, chats);
+  console.log(`virtualItems`, virtualItems);
+
   useEffect(() => {
-    if (inView) {
-      fetchPreviousPage()
-        .then(() => {
-          if (containerRef.current) {
-            setOldHeight(containerRef.current.scrollHeight);
-            setOldScroll(containerRef.current.scrollTop);
-          }
-        })
-        .catch((error) => console.error(error));
+    const first = virtualItems[0];
+
+    if (!!first && first.index === 0 && hasPreviousPage) {
+      fetchPreviousPage().catch((error) => console.error(error));
     }
-  }, [inView, fetchPreviousPage]);
+  }, [fetchPreviousPage, virtualItems, hasPreviousPage]);
+
+  // useEffect(() => {
+  //   if (inView) {
+  //     fetchPreviousPage()
+  //       .then(() => {
+  //         if (containerRef.current) {
+  //           setOldHeight(containerRef.current.scrollHeight);
+  //           setOldScroll(containerRef.current.scrollTop);
+  //         }
+  //       })
+  //       .catch((error) => console.error(error));
+  //   }
+  // }, [inView, fetchPreviousPage]);
 
   const loadRecentChats = useCallback(
     async (manual = false) => {
@@ -74,6 +88,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
         return;
       }
 
+      // TODO: remove all old pages
       const result = await refetch();
       console.log(`refetched ${JSON.stringify(result)}`);
     },
@@ -85,12 +100,12 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
     return () => clearInterval(intervalId);
   }, [loadRecentChats]);
 
-  useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTop =
-        containerRef.current.scrollHeight - oldHeight + oldScroll;
-    }
-  }, [oldHeight, oldScroll]);
+  // useEffect(() => {
+  //   if (containerRef.current) {
+  //     containerRef.current.scrollTop =
+  //       containerRef.current.scrollHeight - oldHeight + oldScroll;
+  //   }
+  // }, [oldHeight, oldScroll]);
 
   return (
     <Container ref={containerRef} color={getColor(name).bottom}>
@@ -103,31 +118,53 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
           <InnerContainer>
             <Skeleton />
           </InnerContainer>
-          <div ref={skeletonRef} />
+          {/* <div ref={skeletonRef} /> */}
         </SkeletonContainer>
       )}
 
-      <InnerContainer>
-        {data?.pages.flat().map((chat, index, chats) => (
-          <Message
-            key={chat.id}
-            id={id}
-            chat={chat}
-            before={chats[index - 1]}
-          />
-        ))}
-        <RefreshContainer>
-          <Refresh onClick={async () => await loadRecentChats(true)} />
-        </RefreshContainer>
+      <InnerContainer style={{ height: virtualizer.getTotalSize() }}>
+        {virtualItems.map((virtualItem) => {
+          // index 0 is assigned to skeleton
+          if (hasPreviousPage && virtualItem.index === 0) {
+            return null;
+          }
+
+          const chatIndex = hasPreviousPage
+            ? virtualItem.index - 1
+            : virtualItem.index;
+
+          const chat = chats[chatIndex];
+
+          return (
+            <div
+              key={chat.id}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                transform: `translateY(${virtualItem.start}px)`,
+                overflow: "auto",
+              }}
+            >
+              <Message id={id} chat={chat} before={chats[chatIndex - 1]} />
+            </div>
+          );
+        })}
       </InnerContainer>
+      <RefreshContainer>
+        <Refresh onClick={async () => await loadRecentChats(true)} />
+      </RefreshContainer>
     </Container>
   );
 };
 
 const Container = styled.div<{ color: string }>`
+  position: relative;
+
   height: 100%;
   overflow-x: hidden;
-  overflow-y: scroll;
+  overflow-y: auto;
 
   padding-right: 10px;
 
@@ -158,11 +195,14 @@ const Container = styled.div<{ color: string }>`
 `;
 
 const InnerContainer = styled.div`
+  position: relative;
+
   display: flex;
   flex-direction: column;
   gap: 2px;
 
   padding-bottom: 10px;
+  background-color: rgba(255, 255, 255, 0.25);
 `;
 
 const SkeletonContainer = styled.div`
