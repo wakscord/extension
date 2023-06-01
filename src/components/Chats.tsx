@@ -101,8 +101,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
 
   useEffect(() => {
     if (settings.autoRefresh) {
-      // TODO: Change interval to 10_000
-      const intervalId = setInterval(handleRefresh, 1_000);
+      const intervalId = setInterval(handleRefresh, 10_000);
       return () => clearInterval(intervalId);
     }
   }, [handleRefresh, settings.autoRefresh]);

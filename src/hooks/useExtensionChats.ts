@@ -52,20 +52,12 @@ const getImages = (data: (Chat | Wakzoo)[]) => {
 export const UseExtensionChatsQuery = (request: UseExtensionChatsRequest) => ({
   queryKey: ["extension.chatsv2", request],
   queryFn: async ({ pageParam }: QueryFunctionContext) => {
-    // TODO: Remove test condition
-    if (pageParam <= 26_500) {
-      console.log("finished!");
-      return [];
-    }
-
     const queryParams = new URLSearchParams({
       ...(pageParam ? { before: (pageParam as number).toString() } : {}),
       authors: request.authors.toString(),
       noWakzoo: request.noWakzoo.toString(),
       noNotify: request.noNotify.toString(),
     }).toString();
-
-    console.log(`fetching ${queryParams}`);
 
     const response = await fetch(
       `${API_ENDPOINT}/extension/${request.twitchId}/chatsv2?${queryParams}`
