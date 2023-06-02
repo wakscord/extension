@@ -1,17 +1,16 @@
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FC, useCallback, useEffect, useMemo } from "react";
 import styled from "styled-components";
-
-import { useInView } from "react-intersection-observer";
-import { getColor } from "../colors";
-import Message from "./discord/Message";
-import Skeleton from "./discord/Skeleton";
-
+import MessagePlaceholder from "./MessagePlaceholder";
+import useExtensionChats from "../hooks/useExtensionChats";
 import { useRecoilValue } from "recoil";
-import { streamers } from "../constants";
-import { Chat, Wakzoo } from "../interfaces";
 import { settingsState } from "../states/settings";
 import { mergeFlag } from "../utils";
+import { streamers } from "../constants";
+import Message from "./discord/Message";
 import Refresh from "./Refresh";
+import { queryClient } from "../utils/network";
+import useScrollElement from "../hooks/useScrollElement";
+import { useInView } from "react-intersection-observer";
 
 interface ChatsProps {
   id: string;
@@ -19,185 +18,115 @@ interface ChatsProps {
   name: string;
 }
 
-const sortChats = (prev: (Chat | Wakzoo)[], next: (Chat | Wakzoo)[]) => {
-  return [
-    ...next.filter(
-      (chat: Chat | Wakzoo) => !prev.find((prevChat) => prevChat.id === chat.id)
-    ),
-    ...prev,
-  ].sort((a: Chat | Wakzoo, b: Chat | Wakzoo) =>
-    new Date(a.time) > new Date(b.time)
-      ? 1
-      : new Date(a.time) < new Date(b.time)
-      ? -1
-      : 0
-  );
-};
-
 const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const { ref: skeletonRef, inView } = useInView({
-    threshold: 0,
-  });
-
-  const [chats, setChats] = useState<(Chat | Wakzoo)[]>([]);
-
-  const [last, setLast] = useState<number | null>(null);
-  const [before, setBefore] = useState<number | null>(null);
-
-  const [isEnd, setIsEnd] = useState(false);
-
-  const [oldHeight, setOldHeight] = useState(0);
-  const [oldScroll, setOldScroll] = useState(0);
-
   const settings = useRecoilValue(settingsState);
+  const { ref: viewRef, inView } = useInView();
 
-  const authors = useMemo(() => {
+  const request = useMemo(() => {
     const flags = Object.entries(settings.authors[name])
       .filter(([, value]) => value)
       .map(([key]) => streamers[key].flag);
 
-    return mergeFlag(flags);
-  }, [settings.authors, name]);
-
-  useEffect(() => {
-    if (inView) {
-      void (async () => {
-        const response = await fetch(
-          `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?before=${
-            before ? before : ""
-          }&authors=${authors}&noWakzoo=${!settings.wakzoos[
-            name
-          ]}&noNotify=${!settings.notify}`
-        );
-
-        const data = (await response.json()) as (Chat | Wakzoo)[];
-
-        if (!data.length) {
-          setIsEnd(true);
-          return;
-        }
-
-        setBefore(data[0].id);
-        setChats((prev) => sortChats(prev, data));
-
-        if (containerRef.current) {
-          setOldHeight(containerRef.current.scrollHeight);
-          setOldScroll(containerRef.current.scrollTop);
-        }
-      })();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inView]);
-
-  const loadRecent = useCallback(
-    async (manual = false) => {
-      if (!manual && !settings.autoRefresh) return;
-
-      const response = await fetch(
-        `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?authors=${authors}&noWakzoo=${!settings
-          .wakzoos[name]}&noNotify=${!settings.notify}`
-      );
-
-      const data = (await response.json()) as (Chat | Wakzoo)[];
-
-      setChats((prev) => sortChats(prev, data));
-    },
-    [
-      settings.autoRefresh,
-      authors,
-      name,
-      settings.notify,
-      settings.wakzoos,
+    return {
       twitchId,
-    ]
+      authors: mergeFlag(flags),
+      noWakzoo: !settings.wakzoos[name],
+      noNotify: !settings.notify,
+    };
+  }, [twitchId, name, settings]);
+
+  const {
+    queryKey,
+    data,
+    refetch,
+    isLoading,
+    isFetching,
+    fetchPreviousPage,
+    hasPreviousPage,
+  } = useExtensionChats(request);
+
+  const chats = useMemo(() => data?.pages.flat() ?? [], [data]);
+  const pages = useMemo(() => data?.pages ?? [], [data]);
+
+  const { scrollRef, innerRef, setHistory } = useScrollElement<
+    HTMLDivElement,
+    HTMLDivElement
+  >({
+    bottom: useMemo(() => pages.length <= 1, [pages]),
+  });
+
+  const isEnd = useMemo(
+    () => !isLoading && !hasPreviousPage,
+    [isLoading, hasPreviousPage]
   );
 
-  useEffect(() => {
-    const intervalId = setInterval(loadRecent, 10000);
-
-    return () => clearInterval(intervalId);
-  }, [loadRecent]);
-
-  useEffect(() => {
-    void (async () => {
-      const response = await fetch(
-        `https://api.wakscord.xyz/extension/${twitchId}/chatsv2?authors=${authors}&noWakzoo=${!settings
-          .wakzoos[name]}&noNotify=${!settings.notify}`
-      );
-
-      const data = (await response.json()) as (Chat | Wakzoo)[];
-
-      setIsEnd(false);
-
-      if (data.length === 0) {
-        setBefore(null);
-        setChats([]);
-        return;
+  /**
+   * 마지막 페이지를 제외한 다른 모든 페이지를 삭제하고,
+   * 남아있는 페이지(=마지막 페이지)를 갱신합니다.
+   */
+  const handleRefresh = useCallback(async () => {
+    queryClient.setQueryData(queryKey, (queryData: typeof data) => {
+      if (!queryData?.pages || !queryData?.pageParams) {
+        return queryData;
       }
 
-      setBefore(data[0].id);
-      setChats(data);
-
-      if (containerRef.current) {
-        setOldHeight(containerRef.current.scrollHeight);
-        setOldScroll(containerRef.current.scrollTop);
-      }
-    })();
-  }, [authors, settings.wakzoos, name, settings.notify, twitchId]);
+      const index = queryData.pages.length - 1;
+      return { pages: [queryData.pages[index]], pageParams: [undefined] };
+    });
+    await refetch();
+    setHistory({ height: 0, scroll: 0 });
+  }, [queryKey, refetch, setHistory]);
 
   useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTop =
-        containerRef.current.scrollHeight - oldHeight + oldScroll;
+    if (inView && !isFetching && hasPreviousPage) {
+      fetchPreviousPage()
+        .then(() => {
+          if (scrollRef.current) {
+            setHistory({
+              height: scrollRef.current.scrollHeight,
+              scroll: scrollRef.current.scrollTop,
+            });
+          }
+        })
+        .catch((error) => console.error(error));
     }
-  }, [oldHeight, oldScroll]);
+  }, [
+    inView,
+    isFetching,
+    hasPreviousPage,
+    fetchPreviousPage,
+    scrollRef,
+    setHistory,
+  ]);
 
   useEffect(() => {
-    if (!chats.length) return;
-
-    if (chats[chats.length - 1].id !== last && containerRef.current) {
-      setOldHeight(containerRef.current.scrollHeight);
-      setOldScroll(containerRef.current.scrollHeight);
+    if (settings.autoRefresh) {
+      const intervalId = setInterval(handleRefresh, 10_000);
+      return () => clearInterval(intervalId);
     }
-
-    setLast(chats[chats.length - 1].id);
-  }, [chats, last]);
+  }, [handleRefresh, settings.autoRefresh]);
 
   return (
-    <Container ref={containerRef} color={getColor(name).bottom}>
-      {isEnd ? (
-        <EndMessage>
-          <span>기록된 모든 채팅을 읽으셨군요!</span>
-        </EndMessage>
-      ) : (
-        <SkeletonContainer>
-          <InnerContainer>
-            <Skeleton />
-          </InnerContainer>
-          <div ref={skeletonRef} />
-        </SkeletonContainer>
-      )}
-
-      <InnerContainer>
+    <Container ref={scrollRef}>
+      <MessagePlaceholder isEnd={isEnd} ref={viewRef} />
+      <InnerContainer ref={innerRef}>
         {chats.map((chat, index) => (
-          <Message key={index} id={id} chat={chat} before={chats[index - 1]} />
-        ))}
-
-        <RefreshContainer>
-          <Refresh
-            onClick={async () => {
-              await loadRecent(true);
-            }}
+          <Message
+            key={chat.id}
+            id={id}
+            chat={chat}
+            before={chats[index - 1]}
           />
+        ))}
+        <RefreshContainer>
+          <Refresh onClick={handleRefresh} />
         </RefreshContainer>
       </InnerContainer>
     </Container>
   );
 };
 
-const Container = styled.div<{ color: string }>`
+const Container = styled.div`
   height: 100%;
   overflow-x: hidden;
   overflow-y: scroll;
@@ -236,18 +165,6 @@ const InnerContainer = styled.div`
   gap: 2px;
 
   padding-bottom: 10px;
-`;
-
-const SkeletonContainer = styled.div`
-  height: 1044px;
-`;
-
-const EndMessage = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  height: 100px;
 `;
 
 const RefreshContainer = styled.div`
