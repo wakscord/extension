@@ -132,10 +132,12 @@ const Container = styled.div`
   overflow-y: scroll;
 
   padding-right: 10px;
+  margin-right: 2px;
+  margin: 0px 4px 0px 0px;
 
   &::-webkit-scrollbar {
-    width: 16px;
-    height: 16px;
+    width: 7px;
+    height: 7px;
   }
 
   &::-webkit-scrollbar-corner {
@@ -148,12 +150,16 @@ const Container = styled.div`
   }
 
   &::-webkit-scrollbar-track {
-    background: #2b2d31;
+    background: transparent;
+    margin: 4px;
+
+    &:hover {
+      background: #2b2d31;
+    }
   }
 
   &::-webkit-scrollbar-thumb,
   &::-webkit-scrollbar-track {
-    border: 4px solid transparent;
     background-clip: padding-box;
     border-radius: 8px;
   }
@@ -173,6 +179,7 @@ const RefreshContainer = styled.div`
   align-items: center;
 
   margin-top: 16px;
+  margin-bottom: 16px;
 `;
 
 export default Chats;

@@ -1,20 +1,20 @@
 import { FC, useEffect } from "react";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import styled, { keyframes } from "styled-components";
 
 import { Controller, useForm } from "react-hook-form";
-import { ReactComponent as CloseIconSVG } from "../assets/close.svg";
 import { streamerNames } from "../constants";
 import { Channel } from "../states/channel";
 import { Settings, settingsOpenState, settingsState } from "../states/settings";
 import Slider from "./discord/Slider";
+import { SettingsCloseIcon, TopRightIconContainer } from "./SettingsIcon";
 
 interface SettingsProps {
   channel: Channel;
 }
 
 const Settings: FC<SettingsProps> = ({ channel }) => {
-  const [isOpen, setIsOpen] = useRecoilState(settingsOpenState);
+  const isOpen = useRecoilValue(settingsOpenState);
   const [defaultValues, setSettings] = useRecoilState(settingsState);
 
   const { control, watch, handleSubmit } = useForm<Settings>({
@@ -37,9 +37,9 @@ const Settings: FC<SettingsProps> = ({ channel }) => {
 
   return (
     <Container isOpen={isOpen}>
-      <CloseButtonContainer>
-        <CloseIcon width={20} height={20} onClick={() => setIsOpen(false)} />
-      </CloseButtonContainer>
+      <TopRightIconContainer>
+        <SettingsCloseIcon />
+      </TopRightIconContainer>
       <InnerContainer>
         <Title>설정</Title>
         <Controller
@@ -118,11 +118,11 @@ const Container = styled.div<{ isOpen: boolean }>`
   background-color: #313338;
 
   visibility: ${(props) => (props.isOpen ? "visible" : "hidden")};
-  transition: visibility 0.2s ease-in-out;
+  transition: visibility 0.2s cubic-bezier(0.19, 1, 0.22, 1);
   pointer-events: ${(props) => (props.isOpen ? "auto" : "none")};
 
   animation: ${(props) => (props.isOpen ? fadeinAnimation : fadeoutAnimation)}
-    0.2s ease-in-out;
+    0.4s cubic-bezier(0.19, 1, 0.22, 1);
 `;
 
 const fadeinAnimation = keyframes`
@@ -149,21 +149,8 @@ const fadeoutAnimation = keyframes`
   }
 `;
 
-const CloseButtonContainer = styled.div`
-  display: flex;
-  justify-content: flex-end;
-
-  padding: 5px;
-  box-sizing: border-box;
-  height: 30px;
-`;
-
-const CloseIcon = styled(CloseIconSVG)`
-  cursor: pointer;
-`;
-
 const InnerContainer = styled.div`
-  padding: 10px 40px 10px;
+  padding: 0px 20px;
 
   display: flex;
   flex-direction: column;
@@ -171,12 +158,14 @@ const InnerContainer = styled.div`
 
   user-select: none;
 
-  height: calc(100% - 60px);
+  height: calc(100% - 4px);
   overflow-y: scroll;
+  margin-right: 2px;
+  margin: 0px 4px 0px 0px;
 
   &::-webkit-scrollbar {
-    width: 16px;
-    height: 16px;
+    width: 7px;
+    height: 7px;
   }
 
   &::-webkit-scrollbar-corner {
@@ -189,20 +178,33 @@ const InnerContainer = styled.div`
   }
 
   &::-webkit-scrollbar-track {
-    background: #2b2d31;
+    background: transparent;
+    transition: background 0.2s cubic-bezier(0.19, 1, 0.22, 1);
+    margin: 4px;
+
+    &:hover {
+      background: #2b2d31;
+    }
   }
 
   &::-webkit-scrollbar-thumb,
   &::-webkit-scrollbar-track {
-    border: 4px solid transparent;
     background-clip: padding-box;
     border-radius: 8px;
+  }
+
+  & > *:first-child {
+    margin-top: 10px;
+  }
+
+  & > *:last-child {
+    margin-bottom: 10vh;
   }
 `;
 
 const Title = styled.h1`
   font-size: 20px;
-  line-height: 24px;
+  line-height: 40px;
   font-weight: bold;
   margin: 0;
 `;

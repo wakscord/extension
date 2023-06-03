@@ -26,7 +26,7 @@ const Info: FC<InfoProps> = ({ channel }) => {
       </Texts>
 
       <LogoContainer href="https://wakscord.xyz" target="_blank">
-        <WakscordLogo width={80} fill={colors.text} />
+        <WakscordLogo width={65} fill={colors.text} />
       </LogoContainer>
     </Container>
   );
@@ -34,7 +34,8 @@ const Info: FC<InfoProps> = ({ channel }) => {
 
 const Container = styled.div<{ color: string }>`
   height: 74px;
-  padding: 10px;
+  padding: 15px 18px;
+  z-index: 10;
 
   display: flex;
   align-items: center;
@@ -66,12 +67,19 @@ const Texts = styled.div<{ color: string }>`
 `;
 
 const Name = styled.span`
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 800;
 `;
 
 const Link = styled.a`
   font-size: 0.9rem;
+  opacity: 0.9;
+
+  transition: opacity 0.2s ease-in-out;
+
+  &:hover {
+    opacity: 1;
+  }
 
   text-decoration: underline;
   color: white;

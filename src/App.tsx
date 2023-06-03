@@ -8,7 +8,10 @@ import Info from "./components/Info";
 import Settings from "./components/Settings";
 import { useChannelState } from "./hooks/ChannelStates";
 import { useChannelId } from "./hooks/ChannelId";
-import { SettingsIcon } from "./components/SettingsIcon";
+import {
+  SettingsOpenIcon,
+  TopRightIconContainer,
+} from "./components/SettingsIcon";
 import Chats from "./components/Chats";
 
 const App: FC = () => {
@@ -19,18 +22,19 @@ const App: FC = () => {
     return <Error onRefresh={refresh} />;
   }
 
-  if (!channel || !channel.id) {
+  if (!channel) {
     return <Default />;
   }
 
   return (
     <>
+      <Default show={false} />
       <Settings channel={channel} />
 
       <Container>
-        <SettingButtonContainer>
-          <SettingsIcon />
-        </SettingButtonContainer>
+        <TopRightIconContainer>
+          <SettingsOpenIcon />
+        </TopRightIconContainer>
 
         <ChatsConainer>
           <Chats
@@ -46,15 +50,6 @@ const App: FC = () => {
   );
 };
 
-const SettingButtonContainer = styled.div`
-  display: flex;
-  justify-content: flex-end;
-
-  padding: 5px;
-  box-sizing: border-box;
-  height: 30px;
-`;
-
 const Container = styled.div`
   height: 100vh;
 
@@ -63,10 +58,9 @@ const Container = styled.div`
 `;
 
 const ChatsConainer = styled.div`
-  height: calc(100vh - 104px);
+  height: calc(100vh - 74px);
 
   box-sizing: border-box;
-  padding-bottom: 10px;
 `;
 
 export default App;
