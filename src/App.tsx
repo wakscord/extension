@@ -1,7 +1,6 @@
 import { FC } from "react";
 import styled from "styled-components";
 
-import Chats from "./components/Chats";
 import Default from "./components/Default";
 import Error from "./components/Error";
 import Info from "./components/Info";
@@ -13,6 +12,7 @@ import {
   SettingsOpenIcon,
   TopRightIconContainer,
 } from "./components/SettingsIcon";
+import Chats from "./components/Chats";
 
 const App: FC = () => {
   const channelId = useChannelId();
