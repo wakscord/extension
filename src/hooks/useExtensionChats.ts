@@ -76,7 +76,6 @@ export const UseExtensionChatsQuery = (request: UseExtensionChatsRequest) => ({
     );
 
     const data = (await response.json()) as (Chat | Wakzoo)[];
-    console.log(getImages(data));
     getImages(data).forEach((url) => prefetchImage(url));
     return sort(data);
   },
