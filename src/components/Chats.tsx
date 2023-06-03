@@ -1,16 +1,16 @@
 import { FC, useCallback, useEffect, useMemo } from "react";
-import styled from "styled-components";
-import MessagePlaceholder from "./MessagePlaceholder";
-import useExtensionChats from "../hooks/useExtensionChats";
+import { useInView } from "react-intersection-observer";
 import { useRecoilValue } from "recoil";
+import styled from "styled-components";
+import { streamers } from "../constants";
+import useExtensionChats from "../hooks/useExtensionChats";
+import useScrollElement from "../hooks/useScrollElement";
 import { settingsState } from "../states/settings";
 import { mergeFlag } from "../utils";
-import { streamers } from "../constants";
-import Message from "./discord/Message";
-import Refresh from "./Refresh";
 import { queryClient } from "../utils/network";
-import useScrollElement from "../hooks/useScrollElement";
-import { useInView } from "react-intersection-observer";
+import MessagePlaceholder from "./MessagePlaceholder";
+import Refresh from "./Refresh";
+import Message from "./discord/Message";
 
 interface ChatsProps {
   id: string;
@@ -151,7 +151,7 @@ const Container = styled.div`
 
   &::-webkit-scrollbar-track {
     background: transparent;
-    margin: 4px;
+    margin: 7px;
 
     &:hover {
       background: #2b2d31;
