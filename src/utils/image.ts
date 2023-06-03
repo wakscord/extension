@@ -1,3 +1,6 @@
 export const prefetchImage = (url: string) => {
-  new Image().src = url;
+  const img = new Image();
+
+  img.referrerPolicy = "no-referrer";
+  img.src = url;
 };
