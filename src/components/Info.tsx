@@ -67,12 +67,12 @@ const Texts = styled.div<{ color: string }>`
 `;
 
 const Name = styled.span`
-  font-size: 1.5rem;
+  font-size: 24px;
   font-weight: 800;
 `;
 
 const Link = styled.a`
-  font-size: 0.9rem;
+  font-size: 14.4px;
   opacity: 0.9;
 
   transition: opacity 0.2s ease-in-out;
