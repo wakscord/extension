@@ -1,9 +1,9 @@
-import { useInfiniteQuery, QueryFunctionContext } from "@tanstack/react-query";
-import { API_ENDPOINT } from "../utils/network";
-import { Chat, Wakzoo } from "../interfaces";
+import { QueryFunctionContext, useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { prefetchImage } from "../utils/image";
 import { streamers } from "../constants";
+import { Chat, Wakzoo } from "../interfaces";
+import { prefetchImage } from "../utils/image";
+import { API_ENDPOINT } from "../utils/network";
 
 export interface UseExtensionChatsRequest {
   twitchId: string;
@@ -26,27 +26,39 @@ const sort = (data: (Chat | Wakzoo)[]) => {
 };
 
 const getImages = (data: (Chat | Wakzoo)[]) => {
-  return data
-    .map((item) => {
-      if (Array.isArray(item.data)) {
-        return (item as Wakzoo).data
-          .map((embed) => embed.image?.url || "")
-          .filter((item) => !!item);
-      }
-      if (item.data !== null) {
-        return [
-          ...Object.keys((item as Chat).data || {}).map(
-            (id) =>
+  return new Set(
+    data
+      .map((item) => {
+        const images = [];
+
+        // 임베드라면 임베드 이미지들 푸시
+        if (Array.isArray(item.data)) {
+          (item as Wakzoo).data
+            .map((embed) => embed.image?.url || "")
+            .filter((item) => !!item)
+            .forEach((url) => images.push(url));
+        }
+
+        // 이모트들 이미지 푸시
+        else {
+          Object.keys((item as Chat).data || {}).forEach((id) => {
+            images.push(
               `https://static-cdn.jtvnw.net/emoticons/v2/${id}/default/light/3.0`
-          ),
-          ...(Object.keys(streamers).includes(item.author)
+            );
+          });
+        }
+
+        // 프로필 사진 이미지 푸시
+        images.push(
+          Object.keys(streamers).includes(item.author)
             ? `https://api.wakscord.xyz/avatar/${streamers[item.author].id}.png`
-            : `https://api.wakscord.xyz/avatar/${item.author}`),
-        ];
-      }
-      return [];
-    })
-    .flat();
+            : `https://api.wakscord.xyz/avatar/${item.author}`
+        );
+
+        return images;
+      })
+      .flat()
+  );
 };
 
 export const UseExtensionChatsQuery = (request: UseExtensionChatsRequest) => ({
@@ -64,6 +76,7 @@ export const UseExtensionChatsQuery = (request: UseExtensionChatsRequest) => ({
     );
 
     const data = (await response.json()) as (Chat | Wakzoo)[];
+    console.log(getImages(data));
     getImages(data).forEach((url) => prefetchImage(url));
     return sort(data);
   },
