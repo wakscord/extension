@@ -20,8 +20,8 @@ export const SettingsCloseIcon = () => {
 
 export const TopRightIconContainer = styled.div`
   position: fixed;
-  top: 10px;
-  right: 10px;
+  top: 15px;
+  right: 20px;
   z-index: 10;
 
   display: flex;
