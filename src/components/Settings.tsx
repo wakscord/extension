@@ -1,20 +1,20 @@
 import { FC, useEffect } from "react";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import styled, { keyframes } from "styled-components";
 
 import { Controller, useForm } from "react-hook-form";
-import { ReactComponent as CloseIconSVG } from "../assets/close.svg";
 import { streamerNames } from "../constants";
 import { Channel } from "../states/channel";
 import { Settings, settingsOpenState, settingsState } from "../states/settings";
 import Slider from "./discord/Slider";
+import { SettingsCloseIcon, TopRightIconContainer } from "./SettingsIcon";
 
 interface SettingsProps {
   channel: Channel;
 }
 
 const Settings: FC<SettingsProps> = ({ channel }) => {
-  const [isOpen, setIsOpen] = useRecoilState(settingsOpenState);
+  const isOpen = useRecoilValue(settingsOpenState);
   const [defaultValues, setSettings] = useRecoilState(settingsState);
 
   const { control, watch, handleSubmit } = useForm<Settings>({
@@ -37,9 +37,9 @@ const Settings: FC<SettingsProps> = ({ channel }) => {
 
   return (
     <Container isOpen={isOpen}>
-      <CloseButtonContainer>
-        <CloseIcon width={20} height={20} onClick={() => setIsOpen(false)} />
-      </CloseButtonContainer>
+      <TopRightIconContainer>
+        <SettingsCloseIcon />
+      </TopRightIconContainer>
       <InnerContainer>
         <Title>설정</Title>
         <Controller
@@ -147,21 +147,6 @@ const fadeoutAnimation = keyframes`
     transform: scale(1);
     opacity: 1;
   }
-`;
-
-const CloseButtonContainer = styled.div`
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  z-index: 10;
-
-  display: flex;
-  justify-content: flex-end;
-  box-sizing: border-box;
-`;
-
-const CloseIcon = styled(CloseIconSVG)`
-  cursor: pointer;
 `;
 
 const InnerContainer = styled.div`
