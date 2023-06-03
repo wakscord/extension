@@ -6,8 +6,8 @@ import { Controller, useForm } from "react-hook-form";
 import { streamerNames } from "../constants";
 import { Channel } from "../states/channel";
 import { Settings, settingsOpenState, settingsState } from "../states/settings";
-import Slider from "./discord/Slider";
 import { SettingsCloseIcon, TopRightIconContainer } from "./SettingsIcon";
+import Slider from "./discord/Slider";
 
 interface SettingsProps {
   channel: Channel;
@@ -22,14 +22,14 @@ const Settings: FC<SettingsProps> = ({ channel }) => {
   });
 
   useEffect(() => {
-    function onSubmit(data: Settings) {
+    const onSubmit = (data: Settings) => {
       setSettings((settings) => ({ ...settings, ...data }));
 
       localStorage.setItem("autoRefresh", JSON.stringify(data.autoRefresh));
       localStorage.setItem("wakzoos", JSON.stringify(data.wakzoos));
       localStorage.setItem("notify", JSON.stringify(data.notify));
       localStorage.setItem("authors", JSON.stringify(data.authors));
-    }
+    };
 
     const subscription = watch(() => void handleSubmit(onSubmit)());
     return () => subscription.unsubscribe();

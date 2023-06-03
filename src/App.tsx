@@ -5,14 +5,14 @@ import Default from "./components/Default";
 import Error from "./components/Error";
 import Info from "./components/Info";
 
+import Chats from "./components/Chats";
 import Settings from "./components/Settings";
-import { useChannelState } from "./hooks/ChannelStates";
-import { useChannelId } from "./hooks/ChannelId";
 import {
   SettingsOpenIcon,
   TopRightIconContainer,
 } from "./components/SettingsIcon";
-import Chats from "./components/Chats";
+import { useChannelId } from "./hooks/useChannelId";
+import { useChannelState } from "./hooks/useChannelState";
 
 const App: FC = () => {
   const channelId = useChannelId();

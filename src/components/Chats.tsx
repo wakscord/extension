@@ -6,7 +6,7 @@ import { streamers } from "../constants";
 import useExtensionChats from "../hooks/useExtensionChats";
 import useScrollElement from "../hooks/useScrollElement";
 import { settingsState } from "../states/settings";
-import { mergeFlag } from "../utils";
+import { mergeFlag } from "../utils/flag";
 import { queryClient } from "../utils/network";
 import MessagePlaceholder from "./MessagePlaceholder";
 import Refresh from "./Refresh";

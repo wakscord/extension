@@ -4,7 +4,7 @@ import styled, { css } from "styled-components";
 
 import { FC } from "react";
 import { Embed as IEmbed } from "../../interfaces";
-import { decodeText } from "../../utils";
+import { decodeText } from "../../utils/decode";
 import Content from "./Content";
 
 interface EmbedProp {
