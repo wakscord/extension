@@ -10,17 +10,17 @@ const Badge: FC<BadgeProps> = ({ children }) => {
 };
 
 const Container = styled.span`
-  margin-right: 0.25rem;
+  margin-right: 4px;
 
-  font-size: 0.7rem;
+  font-size: 11.2px;
 
-  height: 0.9rem;
-  line-height: 0.9rem;
-  padding: 0 0.25rem;
-  border-radius: 0.1875rem;
+  height: 14.4px;
+  line-height: 14.4px;
+  padding: 0 4px;
+  border-radius: 3px;
 
   box-sizing: border-box;
-  margin-bottom: 0.1rem;
+  margin-bottom: 1.6px;
 
   background-color: #5865f2;
 `;

@@ -91,7 +91,7 @@ const Container = styled.div<{ isCompact: boolean }>`
   ${(props) =>
     !props.isCompact &&
     css`
-      margin-top: 1rem;
+      margin-top: 16px;
       padding: 3px 0 3px 10px;
     `}
 
@@ -106,10 +106,10 @@ const HoverInfo = styled.div`
   left: -7.5px;
 
   width: 73px;
-  height: 1.4rem;
-  line-height: 1.4rem;
+  height: 22.4px;
+  line-height: 22.4px;
   text-align: center;
-  font-size: 0.7rem;
+  font-size: 11.2px;
   color: #b9bbbe;
 
   opacity: 0;
@@ -141,7 +141,7 @@ const Header = styled.div`
 `;
 
 const Title = styled.div`
-  margin-right: 0.25rem;
+  margin-right: 4px;
 
   display: flex;
   align-items: center;
@@ -149,7 +149,7 @@ const Title = styled.div`
 `;
 
 const Username = styled.span`
-  margin-right: 0.25rem;
+  margin-right: 4px;
 
   color: white;
   font-weight: 500;
@@ -157,7 +157,7 @@ const Username = styled.span`
 
 const Info = styled.span`
   color: #a3a6aa;
-  font-size: 0.8rem;
+  font-size: 12.8px;
 `;
 
 const ContentContainer = styled.div`

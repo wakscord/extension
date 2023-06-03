@@ -67,7 +67,7 @@ const Embed: FC<EmbedProp> = ({ embed }) => {
 const Container = styled.div<{ borderColor?: number }>`
   margin-top: 5px;
   max-width: 432px;
-  padding: 0.5rem 1rem 0.5rem 0.75rem;
+  padding: 8px 16px 8px 12px;
 
   background-color: #2f3136;
   border-radius: 4px;
@@ -81,21 +81,21 @@ const Container = styled.div<{ borderColor?: number }>`
 `;
 
 const Author = styled.div`
-  font-size: 0.75rem;
+  font-size: 12px;
   font-weight: 600;
   color: #b9bbbe;
 `;
 
 const Title = styled.span`
   display: block;
-  font-size: 1rem;
+  font-size: 16px;
   font-weight: 700;
   margin: 7px 0;
 `;
 
 const UrlTitle = styled.a`
   display: block;
-  font-size: 1rem;
+  font-size: 16px;
   font-weight: 700;
   color: #00aff4;
   margin: 7px 0;
@@ -111,7 +111,7 @@ const UrlTitle = styled.a`
 
 const Description = styled.span`
   display: block;
-  font-size: 0.875rem;
+  font-size: 14px;
   white-space: pre-wrap;
   font-weight: 400;
   margin-bottom: 2px;
@@ -132,7 +132,7 @@ const Field = styled.div<{ inline: boolean }>`
 `;
 
 const FieldName = styled.span`
-  font-size: 0.875rem;
+  font-size: 14px;
   color: #dcddde;
 
   span {
@@ -141,7 +141,7 @@ const FieldName = styled.span`
 `;
 
 const FieldValue = styled.span`
-  font-size: 0.875rem;
+  font-size: 14px;
   font-weight: 400;
   color: #dcddde;
   white-space: pre-wrap;
@@ -156,7 +156,7 @@ const Image = styled.img`
 `;
 
 const Timestamp = styled.span`
-  font-size: 0.75rem;
+  font-size: 12px;
 `;
 
 export default Embed;
