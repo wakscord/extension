@@ -204,7 +204,7 @@ const Container = styled.div<{ color: string }>`
 
   padding-right: 10px;
   margin-right: 2px;
-  margin: 0px 3px 0px 0px;
+  margin: 0px 4px 0px 0px;
 
   &::-webkit-scrollbar {
     width: 7px;
@@ -222,6 +222,7 @@ const Container = styled.div<{ color: string }>`
 
   &::-webkit-scrollbar-track {
     background: transparent;
+    margin: 4px;
 
     &:hover {
       background: #2b2d31;

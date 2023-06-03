@@ -161,7 +161,7 @@ const InnerContainer = styled.div`
   height: calc(100% - 4px);
   overflow-y: scroll;
   margin-right: 2px;
-  margin: 2px 3px 2px 0px;
+  margin: 0px 4px 0px 0px;
 
   &::-webkit-scrollbar {
     width: 7px;
@@ -180,6 +180,7 @@ const InnerContainer = styled.div`
   &::-webkit-scrollbar-track {
     background: transparent;
     transition: background 0.2s cubic-bezier(0.19, 1, 0.22, 1);
+    margin: 4px;
 
     &:hover {
       background: #2b2d31;
