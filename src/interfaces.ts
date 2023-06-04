@@ -27,3 +27,8 @@ export interface Embed {
   footer?: { text: string };
   fields?: { name: string; value: string; inline: boolean }[];
 }
+
+export interface ChatsQueryResult {
+  pageParams: (number | undefined)[];
+  pages: (Chat | Wakzoo)[][];
+}

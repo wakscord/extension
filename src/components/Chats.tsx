@@ -1,12 +1,14 @@
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo } from "react";
 import { useInView } from "react-intersection-observer";
 import { useRecoilValue } from "recoil";
 import styled from "styled-components";
 import { streamers } from "../constants";
 import useExtensionChats from "../hooks/useExtensionChats";
 import useScrollElement from "../hooks/useScrollElement";
+import { ChatsQueryResult } from "../interfaces";
 import { settingsState } from "../states/settings";
 import { mergeFlag } from "../utils/flag";
+import { queryClient } from "../utils/network";
 import MessagePlaceholder from "./MessagePlaceholder";
 import Refresh from "./Refresh";
 import Message from "./discord/Message";
@@ -35,6 +37,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
   }, [twitchId, name, settings]);
 
   const {
+    queryKey,
     data,
     refetch,
     isLoading,
@@ -42,8 +45,6 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
     fetchPreviousPage,
     hasPreviousPage,
   } = useExtensionChats(request);
-
-  const [lastMessageId, setLastMessageId] = useState<number | null>(null);
 
   const chats = useMemo(() => data?.pages.flat() ?? [], [data]);
   const pages = useMemo(() => data?.pages ?? [], [data]);
@@ -65,17 +66,27 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
    * 마지막 페이지에 새로운 내용이 생긴다면 스크롤 위치를 초기화합니다.
    */
   const handleRefresh = useCallback(async () => {
+    const beforeQueryData =
+      queryClient.getQueryData<ChatsQueryResult>(queryKey);
+
+    const beforeLength: number | undefined =
+      beforeQueryData &&
+      beforeQueryData.pages[beforeQueryData.pages.length - 2].length;
+
     await refetch({
       refetchPage: (_, index, allPages) => index === allPages.length - 1,
     });
 
-    const nowLastMessageId = chats[chats.length - 1]?.id ?? null;
+    const afterQueryData = queryClient.getQueryData<ChatsQueryResult>(queryKey);
 
-    if (lastMessageId && lastMessageId !== nowLastMessageId) {
+    const afterLength: number | undefined =
+      afterQueryData &&
+      afterQueryData.pages[afterQueryData.pages.length - 2].length;
+
+    if (beforeLength && afterLength && beforeLength < afterLength) {
       setHistory({ height: 0, scroll: 0 });
-      setLastMessageId(nowLastMessageId);
     }
-  }, [refetch, setHistory, chats, lastMessageId, setLastMessageId]);
+  }, [refetch, setHistory, queryKey]);
 
   useEffect(() => {
     if (inView && !isFetching && hasPreviousPage) {
@@ -97,6 +108,7 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
     fetchPreviousPage,
     scrollRef,
     setHistory,
+    queryKey,
   ]);
 
   useEffect(() => {
