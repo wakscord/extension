@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useMemo } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { useRecoilValue } from "recoil";
 import styled from "styled-components";
@@ -7,7 +7,6 @@ import useExtensionChats from "../hooks/useExtensionChats";
 import useScrollElement from "../hooks/useScrollElement";
 import { settingsState } from "../states/settings";
 import { mergeFlag } from "../utils/flag";
-import { queryClient } from "../utils/network";
 import MessagePlaceholder from "./MessagePlaceholder";
 import Refresh from "./Refresh";
 import Message from "./discord/Message";
@@ -36,7 +35,6 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
   }, [twitchId, name, settings]);
 
   const {
-    queryKey,
     data,
     refetch,
     isLoading,
@@ -44,6 +42,8 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
     fetchPreviousPage,
     hasPreviousPage,
   } = useExtensionChats(request);
+
+  const [lastMessageId, setLastMessageId] = useState<number | null>(null);
 
   const chats = useMemo(() => data?.pages.flat() ?? [], [data]);
   const pages = useMemo(() => data?.pages ?? [], [data]);
@@ -61,21 +61,21 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
   );
 
   /**
-   * 마지막 페이지를 제외한 다른 모든 페이지를 삭제하고,
-   * 남아있는 페이지(=마지막 페이지)를 갱신합니다.
+   * 임시 공간으로 사용되는 마지막 페이지를 갱신합니다.
+   * 마지막 페이지에 새로운 내용이 생긴다면 스크롤 위치를 초기화합니다.
    */
   const handleRefresh = useCallback(async () => {
-    queryClient.setQueryData(queryKey, (queryData: typeof data) => {
-      if (!queryData?.pages || !queryData?.pageParams) {
-        return queryData;
-      }
-
-      const index = queryData.pages.length - 1;
-      return { pages: [queryData.pages[index]], pageParams: [undefined] };
+    await refetch({
+      refetchPage: (_, index, allPages) => index === allPages.length - 1,
     });
-    await refetch();
-    setHistory({ height: 0, scroll: 0 });
-  }, [queryKey, refetch, setHistory]);
+
+    const nowLastMessageId = chats[chats.length - 1]?.id ?? null;
+
+    if (lastMessageId && lastMessageId !== nowLastMessageId) {
+      setHistory({ height: 0, scroll: 0 });
+      setLastMessageId(nowLastMessageId);
+    }
+  }, [refetch, setHistory, chats, lastMessageId, setLastMessageId]);
 
   useEffect(() => {
     if (inView && !isFetching && hasPreviousPage) {

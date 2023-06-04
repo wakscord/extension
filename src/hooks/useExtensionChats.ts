@@ -43,6 +43,28 @@ const useExtensionChats = (request: UseExtensionChatsRequest) => {
       staleTime: 10_000,
       getPreviousPageParam: (firstPage) =>
         firstPage.length ? firstPage[0].id : undefined,
+      select: (data) => {
+        // 마지막 페이지를 임시 공간으로 사용하게 만드는 로직
+        if (data.pages.length > 1) {
+          const lastPageIndex = data.pages.length - 1;
+          const last2PageIndex = data.pages.length - 2;
+
+          // 마지막 페이지를 마지막 전 페이지에 중복 제거 후, 합침
+          data.pages[last2PageIndex] = data.pages[last2PageIndex].concat(
+            data.pages[lastPageIndex].filter(
+              (x) => !data.pages[last2PageIndex].map((x) => x.id).includes(x.id)
+            )
+          );
+
+          // 마지막 페이지를 비움
+          data.pages[lastPageIndex] = [];
+        }
+
+        return {
+          pages: data.pages,
+          pageParams: data.pageParams,
+        };
+      },
     }),
   };
 };
