@@ -45,7 +45,7 @@ export const UseExtensionChatsQuery = (request: UseExtensionChatsRequest) => ({
     if (!pageParam) {
       const lastChatId = getLastChatId(result);
       if (lastChatId === data[data.length - 1]?.id) {
-        return [];
+        throw new Error("새로운 메시지가 더 존재하지 않습니다.");
       } else {
         const ids = result?.pages.flat().map((chat) => chat.id) || [];
         return data.filter((item) => !ids.includes(item.id));
