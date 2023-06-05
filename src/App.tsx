@@ -16,10 +16,10 @@ import { useChannelState } from "./hooks/useChannelState";
 
 const App: FC = () => {
   const channelId = useChannelId();
-  const { channel, error, refresh } = useChannelState(channelId);
+  const { channel, error, is404, refresh } = useChannelState(channelId);
 
   if (error) {
-    return <Error onRefresh={refresh} />;
+    return <Error is404={is404} onRefresh={refresh} />;
   }
 
   if (!channel) {

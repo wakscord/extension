@@ -9,6 +9,7 @@ import { fetchChannelState } from "../utils/network";
 export const useChannelState = (channelId: string | null) => {
   const [channel, setChannel] = useState<Channel | null>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [is404, setIs404] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const load = useCallback(() => {
@@ -30,6 +31,10 @@ export const useChannelState = (channelId: string | null) => {
       .catch((e: Error) => {
         console.error(e);
         setError(e);
+
+        if (e.cause === 404) {
+          setIs404(true);
+        }
       })
       .finally(() => setIsLoading(false));
   }, [channelId]);
@@ -38,5 +43,5 @@ export const useChannelState = (channelId: string | null) => {
     void load();
   }, [load]);
 
-  return { channel, isLoading, error, refresh: load };
+  return { channel, isLoading, error, is404, refresh: load };
 };

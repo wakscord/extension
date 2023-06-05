@@ -24,7 +24,9 @@ export const fetchChannelState = async (channelId: string) => {
   return fetch(`https://api.wakscord.xyz/extension/${channelId}`)
     .then((res) => {
       if (!res.ok) {
-        throw new Error("API 서버에서 채널 상태를 받아오지 못했습니다.");
+        throw new Error("API 서버에서 채널 상태를 받아오지 못했습니다.", {
+          cause: res.status,
+        });
       }
 
       return res.json();

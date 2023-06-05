@@ -4,20 +4,27 @@ import { ReactComponent as WarningSign } from "../assets/warning.svg";
 import Refresh from "./Refresh";
 
 interface ErrorProps {
+  is404?: boolean;
   onRefresh: () => Promise<void>;
 }
 
-const Error: FC<ErrorProps> = ({ onRefresh: onRefreshCallback }) => {
+const Error: FC<ErrorProps> = ({ is404, onRefresh: onRefreshCallback }) => {
   return (
     <Container>
       <WarningSign width={75} fill="#6db69e" />
 
       <ErrorTitle>오류 발생</ErrorTitle>
-      <ErrorText>정보를 불러오던 중 오류가 발생했습니다.</ErrorText>
+      <ErrorText>
+        {is404
+          ? "지원하지 않는 채널입니다."
+          : "정보를 불러오던 중 오류가 발생했습니다."}
+      </ErrorText>
 
-      <RefreshContainer>
-        <Refresh onClick={onRefreshCallback} />
-      </RefreshContainer>
+      {!is404 && (
+        <RefreshContainer>
+          <Refresh onClick={onRefreshCallback} />
+        </RefreshContainer>
+      )}
     </Container>
   );
 };

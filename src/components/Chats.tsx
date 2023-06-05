@@ -22,9 +22,12 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
   const { ref: viewRef, inView } = useInView();
 
   const request = useMemo(() => {
-    const flags = Object.entries(settings.authors[name])
-      .filter(([, value]) => value)
-      .map(([key]) => streamers[key].flag);
+    const flags =
+      settings.authors[name] === undefined
+        ? []
+        : Object.entries(settings.authors[name])
+            .filter(([, value]) => value)
+            .map(([key]) => streamers[key].flag);
 
     return {
       twitchId,
