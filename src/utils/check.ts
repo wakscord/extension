@@ -11,13 +11,13 @@ export const isValidChannelStateResponse = (
     "name" in value &&
     typeof value.name === "string" &&
     "info" in value &&
-    typeof value.info === "object" &&
-    value.info !== null &&
-    "date" in value.info &&
-    typeof value.info.date === "string" &&
-    "idx" in value.info &&
-    typeof value.info.idx === "string" &&
-    "status" in value.info &&
-    typeof value.info.status === "string"
+    (typeof value.info === "object" || value.info === null) &&
+    (value.info === null ||
+      ("date" in value.info &&
+        typeof value.info.date === "string" &&
+        "idx" in value.info &&
+        typeof value.info.idx === "string" &&
+        "status" in value.info &&
+        typeof value.info.status === "string"))
   );
 };

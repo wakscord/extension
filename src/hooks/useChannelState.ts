@@ -27,7 +27,10 @@ export const useChannelState = (channelId: string | null) => {
           ...channelState,
         });
       })
-      .catch((e: Error) => setError(e))
+      .catch((e: Error) => {
+        console.error(e);
+        setError(e);
+      })
       .finally(() => setIsLoading(false));
   }, [channelId]);
 
