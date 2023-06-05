@@ -1,8 +1,8 @@
 import { QueryFunctionContext, useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { Chat, Wakzoo } from "../interfaces";
+import { Chat, ChatQueryResult, Wakzoo } from "../interfaces";
 import { getImages, prefetchImage } from "../utils/image";
-import { API_ENDPOINT } from "../utils/network";
+import { API_ENDPOINT, queryClient } from "../utils/network";
 import { sortChats } from "../utils/tools";
 
 export interface UseExtensionChatsRequest {
@@ -12,9 +12,22 @@ export interface UseExtensionChatsRequest {
   noNotify: boolean;
 }
 
+const getLastChatId = (result: ChatQueryResult | undefined) => {
+  if (!result || !result.pages.length) {
+    return;
+  }
+
+  const chats = result?.pages.flat();
+  return chats[chats.length - 1]?.id;
+};
+
 export const UseExtensionChatsQuery = (request: UseExtensionChatsRequest) => ({
   queryKey: ["extension.chatsv2", request],
-  queryFn: async ({ pageParam }: QueryFunctionContext) => {
+  queryFn: async ({ queryKey, pageParam }: QueryFunctionContext) => {
+    const result = pageParam
+      ? ({} as ChatQueryResult)
+      : queryClient.getQueryData<ChatQueryResult>(queryKey);
+
     const queryParams = new URLSearchParams({
       ...(pageParam ? { before: (pageParam as number).toString() } : {}),
       authors: request.authors.toString(),
@@ -26,10 +39,20 @@ export const UseExtensionChatsQuery = (request: UseExtensionChatsRequest) => ({
       `${API_ENDPOINT}/extension/${request.twitchId}/chatsv2?${queryParams}`
     );
 
-    const data = (await response.json()) as (Chat | Wakzoo)[];
+    const data = sortChats((await response.json()) as (Chat | Wakzoo)[]);
     getImages(data).forEach((url) => prefetchImage(url));
 
-    return sortChats(data);
+    if (!pageParam) {
+      const lastChatId = getLastChatId(result);
+      if (lastChatId === data[data.length - 1]?.id) {
+        throw new Error("새로운 메시지가 더 존재하지 않습니다.");
+      } else {
+        const ids = result?.pages.flat().map((chat) => chat.id) || [];
+        return data.filter((item) => !ids.includes(item.id));
+      }
+    }
+
+    return data;
   },
 });
 
@@ -43,6 +66,7 @@ const useExtensionChats = (request: UseExtensionChatsRequest) => {
       staleTime: 10_000,
       getPreviousPageParam: (firstPage) =>
         firstPage.length ? firstPage[0].id : undefined,
+      getNextPageParam: () => 0,
     }),
   };
 };

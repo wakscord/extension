@@ -1,3 +1,5 @@
+import { InfiniteData } from "@tanstack/react-query";
+
 export interface Chat {
   id: number;
   author: string;
@@ -27,3 +29,5 @@ export interface Embed {
   footer?: { text: string };
   fields?: { name: string; value: string; inline: boolean }[];
 }
+
+export type ChatQueryResult = InfiniteData<(Chat | Wakzoo)[]>;
