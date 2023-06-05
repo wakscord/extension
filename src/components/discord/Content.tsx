@@ -12,7 +12,7 @@ interface ContentProps {
 }
 
 const Content: FC<ContentProps> = ({ content, emotes: rawEmotes }) => {
-  const render: Array<ReactElement> = [];
+  let render: Array<ReactElement> = [];
   const emotes: Record<string, string> = {};
 
   let bigEmote = true;
@@ -28,16 +28,22 @@ const Content: FC<ContentProps> = ({ content, emotes: rawEmotes }) => {
   let index = 0;
   let words = "";
 
-  const createTextFragment = (text: string) => {
-    if (text.match(urlRegex)) {
-      return (
-        <UrlFragment href={text} target="_blank">
-          {text}
-        </UrlFragment>
-      );
-    }
+  const createTextFragment = (text: string): ReactElement[] => {
+    const fragments: ReactElement[] = [];
 
-    return <TextFragment>{text}</TextFragment>;
+    text.split(" ").forEach((word) => {
+      if (word.match(urlRegex))
+        fragments.push(
+          <UrlFragment href={word} target="_blank">
+            {word}
+          </UrlFragment>
+        );
+      else fragments.push(<TextFragment>{word}</TextFragment>);
+
+      fragments.push(<TextFragment> </TextFragment>);
+    });
+
+    return fragments;
   };
 
   content.split(" ").forEach((word) => {
@@ -49,7 +55,7 @@ const Content: FC<ContentProps> = ({ content, emotes: rawEmotes }) => {
 
     if (emotes[idx]) {
       if (words) {
-        render.push(createTextFragment(words));
+        render = render.concat(createTextFragment(words));
 
         words = "";
         bigEmote = false;
@@ -63,7 +69,7 @@ const Content: FC<ContentProps> = ({ content, emotes: rawEmotes }) => {
   });
 
   if (words) {
-    render.push(createTextFragment(words));
+    render = render.concat(createTextFragment(words));
     bigEmote = false;
   }
 
