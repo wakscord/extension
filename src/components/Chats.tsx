@@ -5,8 +5,10 @@ import styled from "styled-components";
 import { streamers } from "../constants";
 import useExtensionChats from "../hooks/useExtensionChats";
 import useScrollElement from "../hooks/useScrollElement";
+import { ChatQueryResult } from "../interfaces";
 import { settingsState } from "../states/settings";
 import { mergeFlag } from "../utils/flag";
+import { queryClient } from "../utils/network";
 import MessagePlaceholder from "./MessagePlaceholder";
 import Refresh from "./Refresh";
 import Message from "./discord/Message";
@@ -63,15 +65,21 @@ const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
   );
 
   /**
-   * 임시 공간으로 사용되는 마지막 페이지를 갱신합니다.
+   * 새로운 채팅을 불러옵니다.
    * 마지막 페이지에 새로운 내용이 생긴다면 스크롤 위치를 초기화합니다.
    */
   const handleRefresh = useCallback(async () => {
-    const { data } = await fetchNextPage();
-    if (data && data.pages[data.pages.length - 1]?.length) {
+    const beforeQueryData = queryClient.getQueryData<ChatQueryResult>(queryKey);
+
+    await fetchNextPage();
+
+    const afterQueryData = queryClient.getQueryData<ChatQueryResult>(queryKey);
+
+    if (
+      beforeQueryData?.pageParams.length !== afterQueryData?.pageParams.length
+    )
       setHistory({ height: 0, scroll: 0 });
-    }
-  }, [setHistory, fetchNextPage]);
+  }, [queryKey, fetchNextPage, setHistory]);
 
   useEffect(() => {
     if (inView && !isFetching && hasPreviousPage) {
