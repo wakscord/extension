@@ -12,7 +12,7 @@ export const getImages = (data: (Chat | Wakzoo)[]) => {
           (item as Wakzoo).data
             .map((embed) => embed.image?.url || "")
             .filter((item) => !!item)
-            .forEach((url) => images.push(url));
+            .forEach((url) => images.push(`https://proxy.wakscord.xyz/${url}`));
         }
 
         // 이모트들 이미지 푸시

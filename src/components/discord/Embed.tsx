@@ -45,7 +45,7 @@ const Embed: FC<EmbedProp> = ({ embed }) => {
 
       {embed.image && (
         <Image
-          src={embed.image.url}
+          src={`https://proxy.wakscord.xyz/${embed.image.url}`}
           referrerPolicy="no-referrer"
           onError={(event) => {
             event.currentTarget.style.display = "none";
