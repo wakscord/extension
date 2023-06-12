@@ -4,53 +4,76 @@ import moment from "moment";
 import "moment/dist/locale/ko";
 import styled, { css } from "styled-components";
 
+import { streamers } from "../../constants";
+import { Chat, Wakzoo } from "../../interfaces";
+import Badge from "./Badge";
 import Content from "./Content";
-
-interface Chat {
-  content: string;
-  time: string;
-  emotes?: {
-    [key: string]: string[];
-  };
-}
+import Embed from "./Embed";
 
 interface MessageProp {
   id: string;
-  name: string;
-  chat: Chat;
-  before?: Chat;
+  chat: Chat | Wakzoo;
+  before?: Chat | Wakzoo;
 }
 
-const Message: FC<MessageProp> = ({ id, name, chat, before }) => {
+const Message: FC<MessageProp> = ({ id, chat, before }) => {
   const isCompact = before
     ? new Date(chat.time).getTime() - new Date(before.time).getTime() <
-      5 * 60 * 1000
-      ? true
-      : false
+        5 * 60 * 1000 && chat.author === before.author
     : false;
 
   return (
     <Container isCompact={isCompact}>
       {isCompact ? (
-        <HoverInfo>{moment(chat.time).format("a h:mm")}</HoverInfo>
+        <HoverInfo>
+          <time dateTime={chat.time}>{moment(chat.time).format("a h:mm")}</time>
+        </HoverInfo>
       ) : (
         <>
-          <Avatar src={`https://api.wakscord.xyz/avatar/${id}.png`} />
+          <Avatar
+            src={
+              Object.keys(streamers).includes(chat.author)
+                ? `https://api.wakscord.xyz/avatar/${
+                    streamers[chat.author].id
+                  }.png`
+                : `https://api.wakscord.xyz/avatar/${chat.author}`
+            }
+            onError={(event) => {
+              event.currentTarget.src = `https://api.wakscord.xyz/avatar/${id}.png`;
+            }}
+          />
 
           <Header>
-            <Username>{name}</Username>
+            <Title>
+              <Username>{chat.author}</Username>
+
+              {!Object.keys(streamers).includes(chat.author) && (
+                <Badge>알림</Badge>
+              )}
+            </Title>
+
             <Info>
-              {new Date().getTime() - new Date(chat.time).getTime() >
-              24 * 60 * 60 * 1000
-                ? moment(chat.time).format("yyyy.MM.DD. a h:mm")
-                : moment(chat.time).calendar()}{" "}
+              <time dateTime={chat.time}>
+                {new Date().getTime() - new Date(chat.time).getTime() >
+                24 * 60 * 60 * 1000
+                  ? moment(chat.time).format("yyyy.MM.DD. a h:mm")
+                  : moment(chat.time).calendar()}{" "}
+              </time>
             </Info>
           </Header>
         </>
       )}
 
       <ContentContainer>
-        <Content content={chat.content} emotes={chat.emotes} />
+        <Content
+          content={chat.content}
+          emotes={Array.isArray(chat.data) ? undefined : (chat as Chat).data}
+        />
+
+        {Array.isArray(chat.data) &&
+          (chat as Wakzoo).data.map((embed, idx) => (
+            <Embed key={idx} embed={embed} />
+          ))}
       </ContentContainer>
     </Container>
   );
@@ -68,7 +91,7 @@ const Container = styled.div<{ isCompact: boolean }>`
   ${(props) =>
     !props.isCompact &&
     css`
-      margin-top: 1rem;
+      margin-top: 16px;
       padding: 3px 0 3px 10px;
     `}
 
@@ -83,10 +106,10 @@ const HoverInfo = styled.div`
   left: -7.5px;
 
   width: 73px;
-  height: 1.4rem;
-  line-height: 1.4rem;
+  height: 22.4px;
+  line-height: 22.4px;
   text-align: center;
-  font-size: 0.7rem;
+  font-size: 11.2px;
   color: #b9bbbe;
 
   opacity: 0;
@@ -111,19 +134,30 @@ const Avatar = styled.img`
 
 const Header = styled.div`
   padding-left: 50px;
+
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+`;
+
+const Title = styled.div`
+  margin-right: 4px;
+
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
 `;
 
 const Username = styled.span`
+  margin-right: 4px;
+
   color: white;
   font-weight: 500;
 `;
 
 const Info = styled.span`
-  vertical-align: center;
-
   color: #a3a6aa;
-  font-size: 0.8rem;
-  margin-left: 0.5rem;
+  font-size: 12.8px;
 `;
 
 const ContentContainer = styled.div`

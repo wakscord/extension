@@ -1,66 +1,40 @@
-import { FC, useEffect } from "react";
+import { FC } from "react";
 import styled from "styled-components";
 
-import { useRecoilState } from "recoil";
-import { ReactComponent as SettingsIconSVG } from "./assets/settings.svg";
-import Chats from "./components/Chats";
 import Default from "./components/Default";
+import Error from "./components/Error";
 import Info from "./components/Info";
 
+import Chats from "./components/Chats";
 import Settings from "./components/Settings";
-import { Channel, channelState } from "./states/channel";
-import { settingsState } from "./states/settings";
+import {
+  SettingsOpenIcon,
+  TopRightIconContainer,
+} from "./components/SettingsIcon";
+import { useChannelId } from "./hooks/useChannelId";
+import { useChannelState } from "./hooks/useChannelState";
 
 const App: FC = () => {
-  const [channel, setChannel] = useRecoilState(channelState);
-  const [settings, setSettings] = useRecoilState(settingsState);
+  const channelId = useChannelId();
+  const { channel, error, is404, refresh } = useChannelState(channelId);
 
-  useEffect(() => {
-    if (import.meta.env.PROD) {
-      Twitch.ext.onAuthorized(({ channelId }) => {
-        initializeChannelState(channelId);
-      });
-    } else {
-      const channelIdForDevelopment =
-        import.meta.env.VITE_CHANNEL_ID ?? "195641865";
-      initializeChannelState(channelIdForDevelopment);
-    }
+  if (error) {
+    return <Error is404={is404} onRefresh={refresh} />;
+  }
 
-    async function initializeChannelState(channelId: string) {
-      const response = await fetch(
-        `https://api.wakscord.xyz/extension/${channelId}`
-      );
-
-      const data = (await response.json()) as Omit<Channel, "twitchId">;
-
-      setChannel({
-        twitchId: channelId,
-        ...data,
-      });
-    }
-  }, []);
-
-  if (!channel || !channel.id) {
+  if (!channel) {
     return <Default />;
   }
 
   return (
     <>
-      <Settings />
+      <Default show={false} />
+      <Settings channel={channel} />
 
       <Container>
-        <SettingButtonContainer>
-          <SettingsIcon
-            width={20}
-            height={20}
-            onClick={() => {
-              setSettings({
-                ...settings,
-                isOpen: true,
-              });
-            }}
-          />
-        </SettingButtonContainer>
+        <TopRightIconContainer>
+          <SettingsOpenIcon />
+        </TopRightIconContainer>
 
         <ChatsConainer>
           <Chats
@@ -76,19 +50,6 @@ const App: FC = () => {
   );
 };
 
-const SettingButtonContainer = styled.div`
-  display: flex;
-  justify-content: flex-end;
-
-  padding: 5px;
-  box-sizing: border-box;
-  height: 30px;
-`;
-
-const SettingsIcon = styled(SettingsIconSVG)`
-  cursor: pointer;
-`;
-
 const Container = styled.div`
   height: 100vh;
 
@@ -97,10 +58,9 @@ const Container = styled.div`
 `;
 
 const ChatsConainer = styled.div`
-  height: calc(100vh - 104px);
+  height: calc(100vh - 74px);
 
   box-sizing: border-box;
-  padding-bottom: 10px;
 `;
 
 export default App;

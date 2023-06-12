@@ -1,115 +1,109 @@
-import { FC } from "react";
-import { useRecoilState } from "recoil";
+import { FC, useEffect } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
 import styled, { keyframes } from "styled-components";
 
-import { ReactComponent as CloseIconSVG } from "../assets/close.svg";
-import { settingsState } from "../states/settings";
+import { Controller, useForm } from "react-hook-form";
+import { streamerNames } from "../constants";
+import { Channel } from "../states/channel";
+import { Settings, settingsOpenState, settingsState } from "../states/settings";
+import { SettingsCloseIcon, TopRightIconContainer } from "./SettingsIcon";
+import Slider from "./discord/Slider";
 
-interface SettingsProps {}
+interface SettingsProps {
+  channel: Channel;
+}
 
-const Settings: FC<SettingsProps> = ({}) => {
-  const [settings, setSettings] = useRecoilState(settingsState);
+const Settings: FC<SettingsProps> = ({ channel }) => {
+  const isOpen = useRecoilValue(settingsOpenState);
+  const [defaultValues, setSettings] = useRecoilState(settingsState);
+
+  const { control, watch, handleSubmit } = useForm<Settings>({
+    defaultValues,
+  });
+
+  useEffect(() => {
+    const onSubmit = (data: Settings) => {
+      setSettings((settings) => ({ ...settings, ...data }));
+
+      localStorage.setItem("autoRefresh", JSON.stringify(data.autoRefresh));
+      localStorage.setItem("wakzoos", JSON.stringify(data.wakzoos));
+      localStorage.setItem("notify", JSON.stringify(data.notify));
+      localStorage.setItem("authors", JSON.stringify(data.authors));
+    };
+
+    const subscription = watch(() => void handleSubmit(onSubmit)());
+    return () => subscription.unsubscribe();
+  }, [handleSubmit, watch, setSettings]);
 
   return (
-    <Container isOpen={settings.isOpen}>
-      <CloseButtonContainer>
-        <CloseIcon
-          width={20}
-          height={20}
-          onClick={() => {
-            setSettings({
-              ...settings,
-              isOpen: false,
-            });
-          }}
-        />
-      </CloseButtonContainer>
+    <Container isOpen={isOpen}>
+      <TopRightIconContainer>
+        <SettingsCloseIcon />
+      </TopRightIconContainer>
       <InnerContainer>
         <Title>설정</Title>
-        <span>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras non elit
-          ut mauris laoreet vestibulum. Suspendisse at sem aliquet, laoreet
-          metus accumsan, iaculis elit. Praesent mi eros, mattis vel vulputate
-          eu, luctus vitae metus. Aenean consectetur ipsum mauris, quis ornare
-          metus tincidunt eget. Mauris rutrum blandit diam rutrum malesuada.
-          Phasellus pharetra eros purus, at maximus justo tempus nec.
-          Suspendisse commodo in urna ac semper. Sed id sem dapibus, pretium
-          nulla a, sollicitudin tellus. Cras blandit pellentesque tortor, sit
-          amet euismod nisi aliquet quis. Aliquam vel magna libero. Sed nisl
-          diam, tincidunt sed ex sit amet, faucibus interdum tortor. Phasellus
-          consequat, odio a sodales condimentum, est dolor consectetur nisi, non
-          commodo nisl dolor eget orci. Suspendisse at magna metus. Quisque sed
-          lobortis mi. Donec congue nec nulla non hendrerit. Morbi venenatis,
-          nisl sit amet dignissim blandit, arcu metus scelerisque quam, sed
-          fermentum nisl purus eget eros. Vestibulum mollis laoreet lectus a
-          consectetur. Curabitur ultricies eu magna vel laoreet. Vestibulum
-          placerat gravida nisl quis tempor. Integer posuere luctus gravida.
-          Integer id quam nibh. Integer nec finibus odio. Morbi nec augue
-          tortor. Nulla luctus bibendum facilisis. Cras sollicitudin odio sem,
-          et bibendum metus porttitor id. Etiam ac rutrum mauris. Praesent et
-          sapien suscipit, sodales est vel, egestas mauris. Integer at mauris
-          sollicitudin, placerat nunc quis, accumsan metus. Quisque vitae nulla
-          et dolor laoreet tincidunt. Vivamus ultricies metus ut lorem ultricies
-          finibus vitae non arcu. Maecenas ut augue vitae tortor egestas posuere
-          sed non risus. Aenean feugiat ultrices placerat. Ut ac facilisis dui.
-          Sed commodo rhoncus arcu sit amet congue. Vivamus malesuada
-          consectetur libero. Morbi consequat felis vel orci interdum, ac varius
-          nibh laoreet. Curabitur ligula augue, tincidunt non sodales id,
-          sagittis at risus. Integer in malesuada lacus. Suspendisse sed
-          vehicula magna. Maecenas non molestie augue. Sed a mattis nisi. Sed
-          accumsan, felis ut dictum bibendum, sapien eros fringilla est, ac
-          tincidunt diam nulla sit amet quam. Orci varius natoque penatibus et
-          magnis dis parturient montes, nascetur ridiculus mus. Integer diam
-          augue, cursus semper tincidunt nec, placerat tempor nisl. Aenean quis
-          tortor a lorem convallis laoreet. Suspendisse potenti. Donec malesuada
-          ante faucibus, feugiat nisi in, convallis quam. Sed quam metus, auctor
-          in ipsum at, condimentum vulputate tortor. Mauris dui ligula,
-          hendrerit ac nibh sit amet, rutrum auctor purus. In a vehicula eros,
-          non elementum arcu. Nam id aliquet nibh. Pellentesque ullamcorper erat
-          non nisl suscipit ultricies. Aliquam erat volutpat. Etiam vitae justo
-          ac elit rutrum fermentum. Nulla facilisi. Suspendisse elementum quam
-          vel mauris vulputate mattis. Nullam rutrum mattis velit in placerat.
-          Fusce eget purus et nisl volutpat malesuada at vitae ligula. Ut
-          sodales sem et ex tempor, non finibus sem consequat. Aliquam pharetra
-          mattis sapien. Cras at pulvinar massa. Donec quis faucibus nibh. In
-          tempus sagittis tortor, vel condimentum massa malesuada quis. Proin
-          mattis ac elit in dictum. Etiam non purus vitae neque vestibulum
-          lobortis. Nunc feugiat leo ullamcorper, mattis dui vel, egestas neque.
-          Phasellus luctus lectus quis finibus laoreet. Etiam ut maximus enim,
-          eget posuere dolor. Mauris feugiat porta cursus. Suspendisse a nibh
-          justo. Donec nec sapien rhoncus, finibus dui sed, convallis mi. Sed
-          non venenatis nibh, quis lobortis odio. Quisque ut erat enim. Nam in
-          cursus dui. Nunc bibendum et orci ut accumsan. Cras eu arcu feugiat,
-          rhoncus ex ultrices, lacinia orci. Etiam eros nibh, ornare eu ligula
-          pharetra, tincidunt sodales sem. Donec fermentum mollis nisl id
-          bibendum. Nullam vulputate at sem sed scelerisque. Phasellus id ex
-          tortor. Nam sapien diam, faucibus vitae ligula id, egestas rhoncus
-          purus. Quisque posuere purus eu quam pulvinar sagittis. Sed sed quam
-          at nisl aliquam luctus eu id felis. Ut rutrum rhoncus neque, quis
-          semper odio dignissim et. In ipsum urna, pharetra sagittis hendrerit
-          at, hendrerit et sapien. Quisque aliquam placerat efficitur. Ut id
-          sapien sem. Donec ut pellentesque ante, at bibendum risus. Vivamus
-          ultricies nisl in justo auctor, at varius magna faucibus. Curabitur
-          faucibus pulvinar lorem, non posuere ligula faucibus at. Nunc leo
-          massa, iaculis et ullamcorper convallis, pharetra at nisl. Nulla ut
-          nibh tincidunt, pharetra ante mattis, suscipit nibh. Donec vitae
-          porttitor massa. Praesent laoreet nisi et enim cursus egestas. Sed
-          fermentum eleifend luctus. Praesent faucibus vitae nisl sed gravida.
-          Ut auctor magna condimentum, lacinia orci quis, eleifend odio. Donec
-          elit nisl, efficitur vitae enim eu, pellentesque bibendum dolor. Orci
-          varius natoque penatibus et magnis dis parturient montes, nascetur
-          ridiculus mus. Quisque nec bibendum arcu. Mauris volutpat, tortor
-          vitae porta laoreet, nunc magna commodo sem, ullamcorper eleifend leo
-          augue sed ex. Nam pharetra fringilla magna a cursus. Maecenas
-          porttitor non lectus a consequat. Maecenas porta lorem non velit
-          iaculis, ut sagittis sem pulvinar. In varius metus at quam posuere, ut
-          pulvinar lectus dictum. Curabitur consequat semper felis, ac suscipit
-          dui imperdiet eu. Sed nec est dui. Etiam at feugiat lacus. Suspendisse
-          ac pulvinar enim. Sed sem justo, laoreet sed sapien quis, aliquet
-          pulvinar nunc. In consectetur suscipit libero sit amet imperdiet. Cras
-          rhoncus felis eros, non tempus urna efficitur a. In turpis leo,
-          vulputate vel ultrices vitae, tempus eget purus.
-        </span>
+        <Controller
+          control={control}
+          name="autoRefresh"
+          render={({ field: { value, onChange } }) => (
+            <FormControl>
+              <FormGroup>
+                <FormLabel style={{ marginBottom: "8px" }}>
+                  자동 새로고침
+                </FormLabel>
+                <FormHelperText>채팅 내용을 상시 불러옵니다.</FormHelperText>
+              </FormGroup>
+              <Slider value={value} onChange={onChange} />
+            </FormControl>
+          )}
+        />
+        <Hr />
+        <Controller
+          control={control}
+          name={`wakzoos.${channel.name}`}
+          render={({ field: { value, onChange } }) => (
+            <FormControl>
+              <FormGroup>
+                <FormLabel style={{ marginBottom: "8px" }}>
+                  왁물원 글 보여주기
+                </FormLabel>
+                <FormHelperText>왁물원 글을 채팅에 보여줍니다.</FormHelperText>
+              </FormGroup>
+              <Slider value={value} onChange={onChange} />
+            </FormControl>
+          )}
+        />
+        <Hr />
+        <Controller
+          control={control}
+          name="notify"
+          render={({ field: { value, onChange } }) => (
+            <FormControl>
+              <FormGroup>
+                <FormLabel style={{ marginBottom: "8px" }}>추가 알림</FormLabel>
+                <FormHelperText>
+                  추가적인 알림을 채팅에 보여줍니다.
+                </FormHelperText>
+              </FormGroup>
+              <Slider value={value} onChange={onChange} />
+            </FormControl>
+          )}
+        />
+        <Hr />
+        <FormHelperText>채팅 표시 여부</FormHelperText>
+        {streamerNames.map((name) => (
+          <Controller
+            key={name}
+            control={control}
+            name={`authors.${channel.name}.${name}`}
+            render={({ field: { value, onChange } }) => (
+              <FormControl>
+                <FormLabel style={{ marginBottom: "8px" }}>{name}</FormLabel>
+                <Slider value={value} onChange={onChange} />
+              </FormControl>
+            )}
+          />
+        ))}
       </InnerContainer>
     </Container>
   );
@@ -124,10 +118,11 @@ const Container = styled.div<{ isOpen: boolean }>`
   background-color: #313338;
 
   visibility: ${(props) => (props.isOpen ? "visible" : "hidden")};
-  transition: visibility 0.2s ease-in-out;
+  transition: visibility 0.2s cubic-bezier(0.19, 1, 0.22, 1);
+  pointer-events: ${(props) => (props.isOpen ? "auto" : "none")};
 
   animation: ${(props) => (props.isOpen ? fadeinAnimation : fadeoutAnimation)}
-    0.2s ease-in-out;
+    0.4s cubic-bezier(0.19, 1, 0.22, 1);
 `;
 
 const fadeinAnimation = keyframes`
@@ -154,34 +149,23 @@ const fadeoutAnimation = keyframes`
   }
 `;
 
-const CloseButtonContainer = styled.div`
-  display: flex;
-  justify-content: flex-end;
-
-  padding: 5px;
-  box-sizing: border-box;
-  height: 30px;
-`;
-
-const CloseIcon = styled(CloseIconSVG)`
-  cursor: pointer;
-`;
-
 const InnerContainer = styled.div`
-  padding: 10px;
+  padding: 0px 20px;
 
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 20px;
 
   user-select: none;
 
-  height: calc(100% - 30px);
+  height: calc(100% - 4px);
   overflow-y: scroll;
+  margin-right: 2px;
+  margin: 0px 4px 0px 0px;
 
   &::-webkit-scrollbar {
-    width: 16px;
-    height: 16px;
+    width: 7px;
+    height: 7px;
   }
 
   &::-webkit-scrollbar-corner {
@@ -194,20 +178,62 @@ const InnerContainer = styled.div`
   }
 
   &::-webkit-scrollbar-track {
-    background: #2b2d31;
+    background: transparent;
+    transition: background 0.2s cubic-bezier(0.19, 1, 0.22, 1);
+    margin: 4px;
+
+    &:hover {
+      background: #2b2d31;
+    }
   }
 
   &::-webkit-scrollbar-thumb,
   &::-webkit-scrollbar-track {
-    border: 4px solid transparent;
     background-clip: padding-box;
     border-radius: 8px;
   }
+
+  & > *:first-child {
+    margin-top: 10px;
+  }
+
+  & > *:last-child {
+    margin-bottom: 10vh;
+  }
 `;
 
-const Title = styled.span`
-  font-size: 2rem;
+const Title = styled.h1`
+  font-size: 20px;
+  line-height: 40px;
   font-weight: bold;
+  margin: 0;
+`;
+
+const FormControl = styled.label`
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+`;
+
+const FormGroup = styled.div`
+  flex: 1;
+`;
+
+const FormLabel = styled.h2`
+  font-size: 16px;
+  font-weight: medium;
+  margin: 0;
+`;
+
+const FormHelperText = styled.div`
+  font-size: 14px;
+  font-weight: regular;
+  color: #b5bac1;
+`;
+
+const Hr = styled.hr`
+  border: 0.5px solid #3f4147;
+  margin: 0;
 `;
 
 export default Settings;

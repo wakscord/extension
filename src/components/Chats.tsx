@@ -1,21 +1,17 @@
-import { FC, useEffect, useRef, useState } from "react";
-import styled from "styled-components";
-
+import { FC, useCallback, useEffect, useMemo } from "react";
 import { useInView } from "react-intersection-observer";
-import { getColor } from "../colors";
-import Message from "./discord/Message";
-import Spinner from "./discord/Spinner";
-
+import { useRecoilValue } from "recoil";
+import styled from "styled-components";
+import { streamers } from "../constants";
+import useExtensionChats from "../hooks/useExtensionChats";
+import useScrollElement from "../hooks/useScrollElement";
+import { ChatQueryResult } from "../interfaces";
+import { settingsState } from "../states/settings";
+import { mergeFlag } from "../utils/flag";
+import { queryClient } from "../utils/network";
+import MessagePlaceholder from "./MessagePlaceholder";
 import Refresh from "./Refresh";
-
-interface Chat {
-  id: number;
-  content: string;
-  time: string;
-  emotes?: {
-    [key: string]: string[];
-  };
-}
+import Message from "./discord/Message";
 
 interface ChatsProps {
   id: string;
@@ -23,165 +19,130 @@ interface ChatsProps {
   name: string;
 }
 
-const sortChats = (prev: Chat[], next: Chat[]) => {
-  return [
-    ...next.filter(
-      (chat: Chat) => !prev.find((prevChat) => prevChat.id === chat.id)
-    ),
-    ...prev,
-  ].sort((a: Chat, b: Chat) => (a.id > b.id ? 1 : a.id < b.id ? -1 : 0));
-};
-
 const Chats: FC<ChatsProps> = ({ id, twitchId, name }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const settings = useRecoilValue(settingsState);
+  const { ref: viewRef, inView } = useInView();
 
-  const { ref: spinnerRef, inView } = useInView({
-    threshold: 0,
+  const request = useMemo(() => {
+    const flags =
+      settings.authors[name] === undefined
+        ? []
+        : Object.entries(settings.authors[name])
+            .filter(([, value]) => value)
+            .map(([key]) => streamers[key].flag);
+
+    return {
+      twitchId,
+      authors: mergeFlag(flags),
+      noWakzoo: !settings.wakzoos[name],
+      noNotify: !settings.notify,
+    };
+  }, [twitchId, name, settings]);
+
+  const {
+    queryKey,
+    data,
+    isLoading,
+    isFetching,
+    fetchPreviousPage,
+    hasPreviousPage,
+    fetchNextPage,
+  } = useExtensionChats(request);
+
+  const chats = useMemo(() => data?.pages.flat() ?? [], [data]);
+  const pages = useMemo(() => data?.pages ?? [], [data]);
+
+  const { scrollRef, innerRef, setHistory } = useScrollElement<
+    HTMLDivElement,
+    HTMLDivElement
+  >({
+    bottom: useMemo(() => pages.length <= 1, [pages]),
   });
 
-  const [chats, setChats] = useState<Chat[]>([]);
+  const isEnd = useMemo(
+    () => !isLoading && !hasPreviousPage,
+    [isLoading, hasPreviousPage]
+  );
 
-  const [last, setLast] = useState<number | null>(null);
-  const [before, setBefore] = useState<number | null>(null);
+  /**
+   * 새로운 채팅을 불러옵니다.
+   * 마지막 페이지에 새로운 내용이 생긴다면 스크롤 위치를 초기화합니다.
+   */
+  const handleRefresh = useCallback(async () => {
+    const beforeQueryData = queryClient.getQueryData<ChatQueryResult>(queryKey);
 
-  const [isFirstLoaded, setIsFirstLoaded] = useState(false);
-  const [isEnd, setIsEnd] = useState(false);
+    await fetchNextPage();
 
-  const [oldHeight, setOldHeight] = useState(0);
-  const [oldScroll, setOldScroll] = useState(0);
+    const afterQueryData = queryClient.getQueryData<ChatQueryResult>(queryKey);
+
+    if (
+      beforeQueryData?.pageParams.length !== afterQueryData?.pageParams.length
+    )
+      setHistory({ height: 0, scroll: 0 });
+  }, [queryKey, fetchNextPage, setHistory]);
 
   useEffect(() => {
-    if (inView) {
-      (async () => {
-        const response = await fetch(
-          `https://api.wakscord.xyz/extension/${twitchId}/chats?before=${
-            before ? before : ""
-          }`
-        );
-
-        const data: Chat[] = await response.json();
-
-        if (!data.length) {
-          setIsEnd(true);
-          return;
-        }
-
-        setBefore(data[0].id);
-        setChats((prev) => sortChats(prev, data));
-
-        if (containerRef.current) {
-          setOldHeight(containerRef.current.scrollHeight);
-          setOldScroll(containerRef.current.scrollTop);
-        }
-      })();
+    if (inView && !isFetching && hasPreviousPage) {
+      fetchPreviousPage()
+        .then(() => {
+          if (scrollRef.current) {
+            setHistory({
+              height: scrollRef.current.scrollHeight,
+              scroll: scrollRef.current.scrollTop,
+            });
+          }
+        })
+        .catch((error) => console.error(error));
     }
-  }, [inView]);
-
-  const loadRecent = async (manual = false) => {
-    if (!manual && localStorage.getItem("autoRefresh") !== "true") return;
-
-    const response = await fetch(
-      `https://api.wakscord.xyz/extension/${twitchId}/chats`
-    );
-
-    const data: Chat[] = await response.json();
-
-    setChats((prev) => sortChats(prev, data));
-  };
+  }, [
+    inView,
+    isFetching,
+    hasPreviousPage,
+    fetchPreviousPage,
+    scrollRef,
+    setHistory,
+    queryKey,
+  ]);
 
   useEffect(() => {
-    (async () => {
-      const response = await fetch(
-        `https://api.wakscord.xyz/extension/${twitchId}/chats`
-      );
-
-      const data: Chat[] = await response.json();
-
-      setIsFirstLoaded(true);
-      setBefore(data[0].id);
-      setChats((prev) =>
-        [
-          ...data.filter(
-            (chat: Chat) => !prev.find((prevChat) => prevChat.id === chat.id)
-          ),
-          ...prev,
-        ].sort((a: Chat, b: Chat) => (a.id > b.id ? 1 : a.id < b.id ? -1 : 0))
-      );
-
-      if (containerRef.current) {
-        setOldHeight(containerRef.current.scrollHeight);
-        setOldScroll(containerRef.current.scrollTop);
-      }
-    })();
-
-    const intervalId = setInterval(loadRecent, 10000);
-
-    return () => clearInterval(intervalId);
-  }, []);
-
-  useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTop =
-        containerRef.current.scrollHeight - oldHeight + oldScroll;
+    if (settings.autoRefresh) {
+      const intervalId = setInterval(handleRefresh, 10_000);
+      return () => clearInterval(intervalId);
     }
-  }, [oldHeight, oldScroll]);
-
-  useEffect(() => {
-    if (!chats.length) return;
-
-    if (chats[chats.length - 1].id !== last && containerRef.current) {
-      setOldHeight(containerRef.current.scrollHeight);
-      setOldScroll(containerRef.current.scrollHeight);
-    }
-
-    setLast(chats[chats.length - 1].id);
-  }, [chats, last]);
+  }, [handleRefresh, settings.autoRefresh]);
 
   return (
-    <Container ref={containerRef} color={getColor(name).bottom}>
-      {isFirstLoaded && !isEnd && (
-        <SpinnerContainer ref={spinnerRef}>
-          <Spinner />
-        </SpinnerContainer>
-      )}
-
-      {isEnd && (
-        <EndMessage>
-          <span>기록된 모든 채팅을 읽으셨군요!</span>
-        </EndMessage>
-      )}
-
-      <InnerContainer>
+    <Container ref={scrollRef}>
+      <MessagePlaceholder isEnd={isEnd} ref={viewRef} />
+      <InnerContainer ref={innerRef}>
         {chats.map((chat, index) => (
           <Message
-            key={index}
+            key={chat.id}
             id={id}
-            name={name}
             chat={chat}
             before={chats[index - 1]}
           />
         ))}
-
         <RefreshContainer>
-          <Refresh
-            onClick={async () => {
-              await loadRecent(true);
-            }}
-          />
+          <Refresh onClick={handleRefresh} />
         </RefreshContainer>
       </InnerContainer>
     </Container>
   );
 };
 
-const Container = styled.div<{ color: string }>`
+const Container = styled.div`
   height: 100%;
   overflow-x: hidden;
   overflow-y: scroll;
 
+  padding-right: 10px;
+  margin-right: 2px;
+  margin: 0px 4px 0px 0px;
+
   &::-webkit-scrollbar {
-    width: 16px;
-    height: 16px;
+    width: 7px;
+    height: 7px;
   }
 
   &::-webkit-scrollbar-corner {
@@ -194,12 +155,16 @@ const Container = styled.div<{ color: string }>`
   }
 
   &::-webkit-scrollbar-track {
-    background: #2b2d31;
+    background: transparent;
+    margin: 7px;
+
+    &:hover {
+      background: #2b2d31;
+    }
   }
 
   &::-webkit-scrollbar-thumb,
   &::-webkit-scrollbar-track {
-    border: 4px solid transparent;
     background-clip: padding-box;
     border-radius: 8px;
   }
@@ -213,29 +178,13 @@ const InnerContainer = styled.div`
   padding-bottom: 10px;
 `;
 
-const SpinnerContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  margin-top: 100px;
-  height: 100px;
-`;
-
-const EndMessage = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  height: 100px;
-`;
-
 const RefreshContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
 
   margin-top: 16px;
+  margin-bottom: 16px;
 `;
 
 export default Chats;
