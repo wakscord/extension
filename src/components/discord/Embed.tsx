@@ -18,10 +18,10 @@ const Embed: FC<EmbedProp> = ({ embed }) => {
       {embed.title &&
         (embed.url ? (
           <UrlTitle href={embed.url} target="_blank">
-            {embed.title}
+            {embed.title.replaceAll("\\", "")}
           </UrlTitle>
         ) : (
-          <Title>{embed.title}</Title>
+          <Title>{embed.title.replaceAll("\\", "")}</Title>
         ))}
 
       {embed.description && (
